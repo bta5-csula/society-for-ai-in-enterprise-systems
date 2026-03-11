@@ -162,7 +162,7 @@
       line-height: 1.0;
       letter-spacing: -0.02em;
       color: var(--text);
-      max-width: 820px;
+      max-width: 820px; flex: 1;
       margin-bottom: 12px;
     }
 
@@ -742,6 +742,7 @@
       .focus-areas { grid-template-columns: 1fr; }
       .team-grid { grid-template-columns: repeat(2, 1fr); }
       .team-grid-bottom { grid-template-columns: repeat(2, 1fr); max-width: 100%; }
+      .hero-logo { display: none; }
       .events-header { flex-direction: column; align-items: flex-start; gap: 20px; }
       footer { flex-direction: column; gap: 24px; padding: 36px 24px; }
     }
@@ -809,9 +810,12 @@
   <section class="hero" id="home">
     <div class="hero-orb"></div>
     <div class="hero-tag">Cal State LA &mdash; Est. 2025 &mdash; Student Organization</div>
-    <h1>
-      Where <em>Artificial<br>Intelligence</em> Meets<br>the Enterprise
-    </h1>
+    <div style="display:flex;align-items:center;gap:48px;">
+      <h1>
+        Where <em>Artificial<br>Intelligence</em> Meets<br>the Enterprise
+      </h1>
+      <img src="img/saies_logo.png" alt="SAIES Logo" class="hero-logo" style="width:220px;height:220px;object-fit:contain;flex-shrink:0;opacity:0.92;filter:drop-shadow(0 0 32px rgba(200,169,110,0.18));" />
+    </div>
     <p class="hero-sub">
       The Society for AI in Enterprise Systems bridges the gap between cutting-edge AI research and real-world business applications. We build, deploy, and think deeply about intelligent systems at scale.
     </p>
@@ -1038,12 +1042,12 @@
       <li><a href="https://www.instagram.com/saiescsula/">Instagram</a></li>
       <li><a href="https://calstatela.presence.io/organization/society-for-ai-in-enterprise-systems">Presence</a></li>
       <li><a href="#">LinkedIn</a></li>
-      <li><a href="mailto:appliedaicsula@gmail.com">Contact</a></li>
+      <li><a href="/cdn-cgi/l/email-protection#214051514d48444540484252544d4061464c40484d0f424e4c">Contact</a></li>
     </ul>
     <div class="footer-copy">© 2026 SAIES. All rights reserved.</div>
   </footer>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // Hamburger menu
     function toggleMenu() {
       const nav = document.getElementById('navLinks');
