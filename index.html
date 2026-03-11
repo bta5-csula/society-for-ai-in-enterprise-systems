@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SAIES — Society for AI in Enterprise Systems</title>
+  <title>SAIES — Society for AI in Enterprise Systems | Cal State LA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <style>
@@ -223,11 +223,10 @@
     .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
 
     .hero-stats {
-      position: absolute;
-      bottom: 60px;
-      left: 48px;
       display: flex;
       gap: 48px;
+      margin-top: auto;
+      padding-top: 48px;
     }
 
     .stat { }
@@ -457,9 +456,17 @@
 
     .team-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 2px;
       margin-top: 48px;
+    }
+
+    .team-grid-bottom {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+      margin-top: 2px;
+      max-width: calc(66.666% + 1px);
     }
 
     .member-card {
@@ -505,6 +512,27 @@
     .member-major {
       font-size: 11px;
       color: var(--text-dim);
+    }
+
+    .advisor-card {
+      padding: 28px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      transition: border-color 0.25s;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .advisor-card:hover { border-color: var(--gold); }
+
+    .advisor-label {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 6px;
     }
 
     /* JOIN */
@@ -663,7 +691,49 @@
 
     @media (max-width: 900px) {
       nav { padding: 16px 24px; }
-      .nav-links { display: none; }
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        gap: 0;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(8,11,16,0.97);
+        backdrop-filter: blur(20px);
+        z-index: 99;
+        justify-content: center;
+        align-items: center;
+        padding: 80px 24px 40px;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li { width: 100%; text-align: center; }
+      .nav-links a {
+        display: block;
+        font-size: 13px;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--border2);
+      }
+      .nav-links li:last-child a { border-bottom: none; margin-top: 24px; }
+      .nav-hamburger {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        cursor: pointer;
+        z-index: 101;
+        background: none;
+        border: none;
+        padding: 4px;
+      }
+      .nav-hamburger span {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: var(--gold);
+        transition: transform 0.3s, opacity 0.3s;
+        transform-origin: center;
+      }
+      .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+      .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+      .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
       section { padding: 72px 24px; }
       .hero { padding: 100px 24px 80px; }
       .hero-stats { left: 24px; gap: 32px; }
@@ -671,9 +741,13 @@
       .events-grid { grid-template-columns: 1fr; }
       .focus-areas { grid-template-columns: 1fr; }
       .team-grid { grid-template-columns: repeat(2, 1fr); }
+      .team-grid-bottom { grid-template-columns: repeat(2, 1fr); max-width: 100%; }
       .events-header { flex-direction: column; align-items: flex-start; gap: 20px; }
       footer { flex-direction: column; gap: 24px; padding: 36px 24px; }
     }
+
+    /* Hide hamburger on desktop */
+    .nav-hamburger { display: none; }
   </style>
 </head>
 <body>
@@ -681,14 +755,17 @@
   <!-- NAV -->
   <nav>
     <a href="#" class="nav-logo">SAIES</a>
-    <ul class="nav-links">
-      <li><a href="#about">About</a></li>
-      <li><a href="#focus">Focus Areas</a></li>
-      <li><a href="#events">Events</a></li>
-      <li><a href="#team">Leadership</a></li>
-      <li><a href="#projects">Projects</a></li>
-      <li><a href="#join" class="nav-cta">Join Us</a></li>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about" onclick="closeMenu()">About</a></li>
+      <li><a href="#focus" onclick="closeMenu()">Focus Areas</a></li>
+      <li><a href="#events" onclick="closeMenu()">Events</a></li>
+      <li><a href="#team" onclick="closeMenu()">Leadership</a></li>
+      <li><a href="#projects" onclick="closeMenu()">Projects</a></li>
+      <li><a href="#join" class="nav-cta" onclick="closeMenu()">Join Us</a></li>
     </ul>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
 
   <!-- TICKER -->
@@ -731,7 +808,7 @@
   <!-- HERO -->
   <section class="hero" id="home">
     <div class="hero-orb"></div>
-    <div class="hero-tag">Est. 2025 &mdash; Student Organization</div>
+    <div class="hero-tag">Cal State LA &mdash; Est. 2025 &mdash; Student Organization</div>
     <h1>
       Where <em>Artificial<br>Intelligence</em> Meets<br>the Enterprise
     </h1>
@@ -744,14 +821,13 @@
     </div>
     <div class="hero-stats">
       <div class="stat">
-        <div class="stat-num">120+</div>
+        <div class="stat-num">20+</div>
         <div class="stat-label">Active Members</div>
       </div>
       <div class="stat">
-        <div class="stat-num">24</div>
-        <div class="stat-label">Events per Year</div>
+        <div class="stat-num">4</div>
+        <div class="stat-label">Projects per Year</div>
       </div>
-
     </div>
   </section>
 
@@ -835,7 +911,7 @@
         <div class="section-tag">// Upcoming Events</div>
         <h2>Mark your <em>calendar</em></h2>
       </div>
-      <a href="#" class="btn-outline" style="flex-shrink:0;">View All Events</a>
+      <!-- <a href="#" class="btn-outline" style="flex-shrink:0;">View All Events</a> -->
    </div>
     <div style="
         border: 1px dashed var(--border);
@@ -893,17 +969,29 @@
         <div class="member-role">Treasurer</div>
         <div class="member-major">Finance, Senior</div>
       </div>
+    </div>
+    <div class="team-grid-bottom">
       <div class="member-card fade-up" style="transition-delay:0.25s">
         <div class="member-avatar">LR</div>
         <div class="member-name">Lizzie Reyes</div>
         <div class="member-role">Secretary</div>
         <div class="member-major">Accounting, Senior</div>
       </div>
-      <div class="member-card fade-up" style="transition-delay:0.25s">
+      <div class="member-card fade-up" style="transition-delay:0.3s">
         <div class="member-avatar">BT</div>
         <div class="member-name">Brian Ta</div>
         <div class="member-role">Committee Chair</div>
         <div class="member-major">Computer Information Systems + Business Administration, Junior</div>
+      </div>
+    </div>
+
+    <div class="advisor-card fade-up" style="transition-delay:0.35s">
+      <div class="member-avatar" style="flex-shrink:0;">MW</div>
+      <div>
+        <div class="advisor-label">Faculty Advisor</div>
+        <div class="member-name">Dr. Ming Wang</div>
+        <div class="member-role">Department Chair, Computer Information Systems</div>
+        <div class="member-major">Cal State LA — College of Business and Economics</div>
       </div>
     </div>
   </section>
@@ -950,12 +1038,24 @@
       <li><a href="https://www.instagram.com/saiescsula/">Instagram</a></li>
       <li><a href="https://calstatela.presence.io/organization/society-for-ai-in-enterprise-systems">Presence</a></li>
       <li><a href="#">LinkedIn</a></li>
-      <li><a href="#">Contact</a></li>
+      <li><a href="mailto:appliedaicsula@gmail.com">Contact</a></li>
     </ul>
     <div class="footer-copy">© 2026 SAIES. All rights reserved.</div>
   </footer>
 
   <script>
+    // Hamburger menu
+    function toggleMenu() {
+      const nav = document.getElementById('navLinks');
+      const btn = document.getElementById('hamburger');
+      nav.classList.toggle('open');
+      btn.classList.toggle('open');
+    }
+    function closeMenu() {
+      document.getElementById('navLinks').classList.remove('open');
+      document.getElementById('hamburger').classList.remove('open');
+    }
+
     // Scroll-triggered fade-in
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => {
