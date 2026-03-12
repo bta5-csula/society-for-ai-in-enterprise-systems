@@ -1052,12 +1052,12 @@
       <li><a href="https://www.instagram.com/saiescsula/">Instagram</a></li>
       <li><a href="https://calstatela.presence.io/organization/society-for-ai-in-enterprise-systems">Presence</a></li>
       <li><a href="#">LinkedIn</a></li>
-      <li><a href="/cdn-cgi/l/email-protection#f19081819d98949590989282849d90b1969c90989ddf929e9c">Contact</a></li>
+      <li><a href="mailto:appliedaicsula@gmail.com">Contact</a></li>
     </ul>
     <div class="footer-copy">© 2026 SAIES. All rights reserved.</div>
   </footer>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
     // Hamburger menu
     function toggleMenu() {
       const nav = document.getElementById('navLinks');
@@ -1077,9 +1077,14 @@
           e.target.classList.add('visible');
         }
       });
-    }, { threshold: 0.12 });
+    }, { threshold: 0.01, rootMargin: '0px 0px -40px 0px' });
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Fallback: if elements are still hidden after 1.5s, make them all visible
+    setTimeout(() => {
+      document.querySelectorAll('.fade-up').forEach(el => el.classList.add('visible'));
+    }, 1500);
 
     // Google Sheets + Formspree dual submission
     const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
@@ -1162,4 +1167,10 @@
       sections.forEach(s => {
         if (window.scrollY >= s.offsetTop - 100) current = s.id;
       });
-      na
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + current ? 'var(--gold)' : '';
+      });
+    });
+  </script>
+</body>
+</html>
