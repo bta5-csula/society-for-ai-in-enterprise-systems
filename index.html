@@ -1034,10 +1034,9 @@
     <p class="join-sub fade-up" style="transition-delay:0.15s">
       Drop your email and we'll send you everything you need to know about joining SAIES — meeting times, onboarding, and open project teams.
     </p>
-    <form class="join-form fade-up" style="transition-delay:0.2s" id="joinForm">
-      <input type="email" name="email" placeholder="your.email@university.edu" required />
+    <form class="join-form fade-up" style="transition-delay:0.2s" id="joinForm" action="https://formspree.io/f/mlgpbwvd" method="POST">
+      <input type="email" name="Email" placeholder="your.email@university.edu" required />
       <button type="submit" id="submitBtn">Get Info</button>
-      <p id="formStatus" style="font-size:13px;margin-top:12px;display:none;"></p>
     </form>
   </section>
 
@@ -1086,46 +1085,19 @@
       document.querySelectorAll('.fade-up').forEach(el => el.classList.add('visible'));
     }, 1500);
 
-    // Google Sheets + Formspree dual submission
-    const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
-    const FORMSPREE_URL = 'https://formspree.io/f/mlgpbwvd';
-    document.getElementById('joinForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const btn = document.getElementById('submitBtn');
-      const status = document.getElementById('formStatus');
-      const form = e.target;
-
-      btn.textContent = 'Sending...';
-      btn.disabled = true;
-
-      const email = form.email.value;
-
-      try {
-        // Submit to both in parallel
-        await Promise.all([
-          fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({ email })
-          }),
-          fetch(FORMSPREE_URL, {
-            method: 'POST',
-            headers: { 'Accept': 'application/json' },
-            body: JSON.stringify({ email })
-          })
-        ]);
-        status.style.display = 'block';
-        status.style.color = 'var(--teal)';
-        status.textContent = "✓ You're on the list! We'll be in touch soon.";
-        form.reset();
-      } catch (err) {
-        status.style.display = 'block';
-        status.style.color = '#e07070';
-        status.textContent = 'Something went wrong. Please try again or email us directly.';
-      } finally {
-        btn.textContent = 'Get Info';
-        btn.disabled = false;
-      }
+    // Send to Google Sheets silently, then let Formspree handle the rest
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx768v3yugq5GSvxOYyS97NtPg2u2_vqmB4QkhQu68-aR-zW_BCnYWhblNRmTEnbVCm/exec';
+    document.getElementById('joinForm').addEventListener('submit', function(e) {
+      const email = document.querySelector('#joinForm input[name="Email"]').value;
+      const formData = new FormData();
+      formData.append('Email', email);
+      // Fire to Apps Script and don't wait — let form submit to Formspree normally
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
+      // Form continues submitting to Formspree via action attribute
     });
     const tickerEl = document.querySelector('.ticker');
     const half = document.querySelector('.ticker-half');
@@ -1167,7 +1139,7 @@
       sections.forEach(s => {
         if (window.scrollY >= s.offsetTop - 100) current = s.id;
       });
-      navLinks.forEach(a => {
+avLinks.forEach(a => {
         a.style.color = a.getAttribute('href') === '#' + current ? 'var(--gold)' : '';
       });
     });
