@@ -566,7 +566,8 @@
       margin: 0 auto;
     }
 
-    .join-form input {
+    .join-form input,
+    .join-form textarea {
       flex: 1;
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -579,8 +580,10 @@
       transition: border-color 0.2s;
     }
 
-    .join-form input::placeholder { color: var(--text-dim); }
-    .join-form input:focus { border-color: var(--gold); }
+    .join-form input::placeholder,
+    .join-form textarea::placeholder { color: var(--text-dim); }
+    .join-form input:focus,
+    .join-form textarea:focus { border-color: var(--gold); outline: none; }
 
     .join-form button {
       background: var(--gold);
@@ -1031,9 +1034,10 @@
     <p class="join-sub fade-up" style="transition-delay:0.15s">
       Drop your email and we'll send you everything you need to know about joining SAIES — meeting times, onboarding, and open project teams.
     </p>
-    <form class="join-form fade-up" style="transition-delay:0.2s" action="https://formspree.io/f/mlgpbwvd" method="POST">
+    <form class="join-form fade-up" style="transition-delay:0.2s" id="joinForm">
       <input type="email" name="email" placeholder="your.email@university.edu" required />
-      <button type="submit">Get Info</button>
+      <button type="submit" id="submitBtn">Get Info</button>
+      <p id="formStatus" style="font-size:13px;margin-top:12px;display:none;"></p>
     </form>
   </section>
 
@@ -1048,12 +1052,12 @@
       <li><a href="https://www.instagram.com/saiescsula/">Instagram</a></li>
       <li><a href="https://calstatela.presence.io/organization/society-for-ai-in-enterprise-systems">Presence</a></li>
       <li><a href="#">LinkedIn</a></li>
-      <li><a href="/cdn-cgi/l/email-protection#214051514d48444540484252544d4061464c40484d0f424e4c">Contact</a></li>
+      <li><a href="mailto:appliedaicsula@gmail.com">Contact</a></li>
     </ul>
     <div class="footer-copy">© 2026 SAIES. All rights reserved.</div>
   </footer>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
     // Hamburger menu
     function toggleMenu() {
       const nav = document.getElementById('navLinks');
@@ -1077,7 +1081,46 @@
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-    // Seamless ticker — clone content and animate by exact measured width
+    // Google Sheets + Formspree dual submission
+    const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+    const FORMSPREE_URL = 'https://formspree.io/f/mlgpbwvd';
+    document.getElementById('joinForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const status = document.getElementById('formStatus');
+      const form = e.target;
+
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+
+      const email = form.email.value;
+
+      try {
+        // Submit to both in parallel
+        await Promise.all([
+          fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ email })
+          }),
+          fetch(FORMSPREE_URL, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+            body: JSON.stringify({ email })
+          })
+        ]);
+        status.style.display = 'block';
+        status.style.color = 'var(--teal)';
+        status.textContent = "✓ You're on the list! We'll be in touch soon.";
+        form.reset();
+      } catch (err) {
+        status.style.display = 'block';
+        status.style.color = '#e07070';
+        status.textContent = 'Something went wrong. Please try again or email us directly.';
+      } finally {
+        btn.textContent = 'Get Info';
+        btn.disabled = false;
+      }
+    });
     const tickerEl = document.querySelector('.ticker');
     const half = document.querySelector('.ticker-half');
     // Clone the half so we have two identical sets side by side
