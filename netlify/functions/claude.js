@@ -13,7 +13,7 @@ exports.handler = async function(event) {
 
   try {
     const apiKey = process.env.GEMINI_API_KEY;
-    const model  = 'gemini-2.5-flash-lite-preview-06-17';
+    const model  = 'gemini-1.5-flash';
     const url    = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
@@ -26,6 +26,12 @@ exports.handler = async function(event) {
     });
 
     const data = await response.json();
+
+    // Log for debugging
+    if (!data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      console.error('Unexpected Gemini response:', JSON.stringify(data));
+    }
+
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     return {
@@ -34,6 +40,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({ text })
     };
   } catch (err) {
+    console.error('Function error:', err.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Proxy error', detail: err.message })
