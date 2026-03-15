@@ -437,7 +437,7 @@
   </main>
 
   <footer>
-    A project by <a href="index.html">Brian Ta - SAIES</a> · Cal State LA
+    A project by <a href="index.html">SAIES — Society for AI in Enterprise Systems</a> · Cal State LA
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
@@ -515,10 +515,17 @@ ACTOR RULES:
 
 PRIMARY USE CASE RULES:
 A primary use case is a standalone top-level goal that an actor directly initiates.
-Connect to actor with "association". Keep to 3-6 primary use cases across all actors.
+Connect to actor with "association". Keep to 3-6 primary use cases TOTAL across all actors.
 Ask: "Does the actor go to the system with THIS as their main goal?"
 - YES → primary, connect to actor with association
 - NO (it only happens as a sub-step inside another use case) → secondary, no association
+
+STRICT ANTI-DECOMPOSITION RULES — these are the most common mistakes:
+- Do NOT split one primary use case into multiple primary use cases. Example: "Manage training resources" is ONE primary UC — do NOT also create separate primary UCs for "Add resource", "Update resource", "Delete resource". Those are secondary UCs connected via include/extend.
+- Do NOT create use cases for non-functional requirements. Password protection, authentication, scalability, responsive design = NOT use cases.
+- Do NOT create use cases for implementation details like "View resource content", "Display progress details", "Authenticate user". These are system behaviors, not actor goals.
+- Keep secondary use cases to major business sub-behaviors only — typically 3-8 total.
+- If a use case only exists because of how the system is built internally, remove it.
 
 INCLUDE vs EXTEND RULES:
 INCLUDE = the sub-step ALWAYS happens, every single time, no exceptions
@@ -529,15 +536,22 @@ EXTEND = the sub-step ONLY happens SOMETIMES, under certain conditions
   "from" = base use case, "to" = the optional sub-step
   Ask: "Can the base use case complete WITHOUT the sub-step?" If YES → extend
 
-CRITICAL DISTINCTIONS — apply these exact rules:
-- Accessibility/accommodations: ALWAYS required by the system → use INCLUDE (not extend)
-- Adding members to a team: ALWAYS part of managing membership → use INCLUDE
-- Removing members from a team: OPTIONAL (only when needed) → use EXTEND
-- Providing feedback after grading: OPTIONAL (not always done) → use EXTEND
-- Plagiarism check on submission: ALWAYS happens on every submission → use INCLUDE
-- Peer review: triggered after grading begins AND after submission. Connect BOTH "Evaluate submissions" →include→ "Complete peer review" AND "Submit capstone work" →include→ "Complete peer review". Do NOT connect Student directly to peer review via association.
+SEPARATE USE CASES FOR DIFFERENT ACTORS:
+If two different actors perform the same action but are distinct roles (e.g. Client and Intern both access resources), give each their OWN separate use case with the same name. Do NOT merge them into one shared use case. Each actor should have their own ellipse connected by their own association line.
 
-CORRECT WORKED EXAMPLE (Capstone system):
+SPECIFIC RULES:
+- Adding something: ALWAYS part of managing → use INCLUDE
+- Updating something: OPTIONAL (only when content changes) → use EXTEND
+- Deleting something: OPTIONAL (only when removing) → use EXTEND
+- Organizing into categories (training paths): PRIMARY use case for the manager (direct association line). Do NOT make it secondary.
+- Granting access to resources: INCLUDE from the assign use case (always happens when assigning)
+- Tracking progress: EXTEND from the assign use case (optional monitoring)
+- Use case chains are valid and expected: A→B→C where A includes B, B includes C
+- Granting access: OPTIONAL extension of assigning → use EXTEND
+- Plagiarism check on submission: ALWAYS happens → use INCLUDE
+- Peer review: triggered after grading AND after submission → use INCLUDE from both
+
+WORKED EXAMPLE 1 — Canvas Capstone Assignments:
 {
   "systemName": "Canvas Capstone Assignments",
   "actors": [
@@ -576,6 +590,54 @@ CORRECT WORKED EXAMPLE (Capstone system):
     {"from": "uc5", "to": "uc13", "type": "include"},
     {"from": "uc5", "to": "uc12", "type": "include"},
     {"from": "uc13", "to": "a3", "type": "include"}
+  ]
+}
+
+WORKED EXAMPLE 2 — MIND Care Training System:
+Key decisions:
+- Manager has 3 primary UCs: Manage resources, Organize into categories, Assign training paths
+- "Organize into categories" IS a primary UC for Manager (direct association) — NOT secondary
+- "Track training progress" is SECONDARY — extend FROM Assign training paths (right column)
+- "Grant read-only access" is SECONDARY — include FROM Assign training paths (left column, placed between Assign and Access resources)
+- "Access resources" is PRIMARY for both Intern and Client (direct associations) — left column
+- "Acknowledge progress" is SECONDARY — include FROM Access resources (Interns). Intern does NOT directly associate with Acknowledge; they reach it through Access resources.
+- USE CASE CHAINS ARE VALID: Assign → Grant access → Access resources (Interns/Clients)
+- Intern associates ONLY with "Access resources", NOT with "Acknowledge progress"
+{
+  "systemName": "MIND Care Training System",
+  "actors": [
+    {"id": "a1", "name": "Manager", "side": "left", "type": "human"},
+    {"id": "a2", "name": "Interns", "side": "left", "type": "human"},
+    {"id": "a3", "name": "Clients", "side": "left", "type": "human"}
+  ],
+  "usecases": [
+    {"id": "uc1", "name": "Manage training resources"},
+    {"id": "uc2", "name": "Organize resources into categories (training paths)"},
+    {"id": "uc3", "name": "Assign training paths to each client or intern"},
+    {"id": "uc4", "name": "Access resources in assigned training path"},
+    {"id": "uc5", "name": "Access resources in assigned training path"},
+    {"id": "uc6", "name": "Add training resources"},
+    {"id": "uc7", "name": "Update training resources"},
+    {"id": "uc8", "name": "Delete training resources"},
+    {"id": "uc9", "name": "Track training progress of interns"},
+    {"id": "uc10", "name": "Grant read-only access to training resources based on assigned paths"},
+    {"id": "uc11", "name": "Acknowledge progress on assigned resources"}
+  ],
+  "relationships": [
+    {"from": "a1", "to": "uc1", "type": "association"},
+    {"from": "a1", "to": "uc2", "type": "association"},
+    {"from": "a1", "to": "uc3", "type": "association"},
+    {"from": "a2", "to": "uc4", "type": "association"},
+    {"from": "a3", "to": "uc5", "type": "association"},
+    {"from": "uc1", "to": "uc6", "type": "include"},
+    {"from": "uc1", "to": "uc7", "type": "extend"},
+    {"from": "uc1", "to": "uc8", "type": "extend"},
+    {"from": "uc3", "to": "uc9", "type": "extend"},
+    {"from": "uc3", "to": "uc10", "type": "include"},
+    {"from": "uc10", "to": "uc4", "type": "include"},
+    {"from": "uc10", "to": "uc5", "type": "include"},
+    {"from": "uc4", "to": "uc11", "type": "include"},
+    {"from": "uc9", "to": "uc11", "type": "include"}
   ]
 }
 
@@ -643,162 +705,220 @@ erDiagram
       const actorIds     = new Set(actors.map(a => a.id));
 
       const primaryUCIds = new Set(
-        relationships.filter(r => r.type === 'association' && actorIds.has(r.from)).map(r => r.to)
+        relationships.filter(r => r.type==='association' && actorIds.has(r.from)).map(r => r.to)
       );
       const primaryUCs   = usecases.filter(uc => primaryUCIds.has(uc.id));
       const secondaryUCs = usecases.filter(uc => !primaryUCIds.has(uc.id));
+      const secondaryIds = new Set(secondaryUCs.map(u => u.id));
 
-      // --- Layout constants ---
-      const ucRx = 88, ucRy = 36;
-      const primaryGapY = 80;
-      const minSecSep   = 130;
-      const colGap      = 110;
-      const sysPadL = 36, sysPadR = 36, sysPadT = 74, sysPadB = 68;
-      const sysX = 148, sysY = 30;
-      const rowH = ucRy * 2 + primaryGapY;
-
-      // Primary UC positions
-      const ucPos = {};
-      primaryUCs.forEach((uc, i) => {
-        ucPos[uc.id] = { x: sysX + sysPadL + ucRx, y: sysY + sysPadT + i * rowH + ucRy };
+      // BRIDGE secondaries = point TO a primary UC → go in LEFT col
+      const bridgeIds = new Set();
+      relationships.forEach(r => {
+        if (secondaryIds.has(r.from) && primaryUCIds.has(r.to)
+            && (r.type==='include'||r.type==='extend'))
+          bridgeIds.add(r.from);
+      });
+      const bridgesFromPrimary = {};
+      relationships.forEach(r => {
+        if (primaryUCIds.has(r.from) && bridgeIds.has(r.to)
+            && (r.type==='include'||r.type==='extend')) {
+          if (!bridgesFromPrimary[r.from]) bridgesFromPrimary[r.from] = [];
+          if (!bridgesFromPrimary[r.from].includes(r.to))
+            bridgesFromPrimary[r.from].push(r.to);
+        }
       });
 
-      // Secondary UC positions
-      const secX = sysX + sysPadL + ucRx * 2 + colGap + ucRx;
-      if (secondaryUCs.length > 0) {
+      // Layout constants
+      const ucRx=88, ucRy=36, primaryGapY=80, minSecSep=130, colGap=110;
+      const sysPadL=36, sysPadR=36, sysPadT=74, sysPadB=68;
+      const sysX=148, sysY=30;
+      const rowH = ucRy*2+primaryGapY;
+
+      const primaryColX = sysX+sysPadL+ucRx;
+      const secX        = sysX+sysPadL+ucRx*2+colGap+ucRx;
+      const labelX      = primaryColX+ucRx+colGap*0.45;
+
+      // Place primaries with extra spacing where bridges are inserted
+      const ucPos = {};
+      let yCursor = sysY+sysPadT+ucRy;
+      primaryUCs.forEach(uc => {
+        ucPos[uc.id] = { x: primaryColX, y: yCursor };
+        const bridges = bridgesFromPrimary[uc.id] || [];
+        yCursor += rowH + bridges.length*rowH;
+      });
+
+      // Place bridge UCs right after their source primary
+      Object.entries(bridgesFromPrimary).forEach(([primId, bList]) => {
+        bList.forEach((bId, i) => {
+          ucPos[bId] = { x: primaryColX, y: ucPos[primId].y + rowH*(i+1) };
+        });
+      });
+
+      // LEAF secondaries → right column
+      const leafUCs = secondaryUCs.filter(uc => !bridgeIds.has(uc.id));
+      if (leafUCs.length > 0) {
         const idealY = {};
-        secondaryUCs.forEach(uc => {
+        leafUCs.forEach(uc => {
           const ys = relationships
-            .filter(r => (r.from === uc.id || r.to === uc.id) && r.type !== 'association')
-            .map(r => { const oid = r.from===uc.id?r.to:r.from; return ucPos[oid]?.y; })
-            .filter(y => y != null);
+            .filter(r => (r.from===uc.id||r.to===uc.id) && r.type!=='association')
+            .map(r => { const oid=r.from===uc.id?r.to:r.from; return ucPos[oid]?.y; })
+            .filter(y => y!=null);
           idealY[uc.id] = ys.length ? ys.reduce((s,y)=>s+y,0)/ys.length : sysY+sysPadT+ucRy;
         });
-        const sorted = [...secondaryUCs].sort((a,b) => idealY[a.id]-idealY[b.id]);
+        const sorted = [...leafUCs].sort((a,b)=>idealY[a.id]-idealY[b.id]);
         const placed = [];
         sorted.forEach(uc => {
           let y = idealY[uc.id];
-          for (const py of placed) { if (Math.abs(y-py) < minSecSep) y = py + minSecSep; }
+          for (const py of placed) { if(Math.abs(y-py)<minSecSep) y=py+minSecSep; }
           placed.push(y);
           ucPos[uc.id] = { x: secX, y };
         });
       }
 
       // System height
-      const allUCYs = Object.values(ucPos).map(p => p.y);
+      const allUCYs = Object.values(ucPos).map(p=>p.y);
       const sysH = Math.max(
-        primaryUCs.length * rowH + sysPadT + sysPadB,
-        allUCYs.length ? (Math.max(...allUCYs) - sysY + ucRy + sysPadB) : 300
+        yCursor - ucRy + sysPadB - sysY,
+        allUCYs.length ? Math.max(...allUCYs)-sysY+ucRy+sysPadB : 300
       );
-      const hasTwoCol = secondaryUCs.length > 0;
-      const colCount  = hasTwoCol ? 2 : 1;
-      const sysW = colCount*(ucRx*2)+(colCount-1)*colGap+sysPadL+sysPadR;
-      const bottomActorH = bottomActors.length > 0 ? 148 : 0;
-      const totalW = sysX + sysW + (rightActors.length > 0 ? 148 : 40);
-      const totalH = sysY + sysH + bottomActorH + 55;
-
-      // The x position of the gap between columns — all labels go here
-      const primaryColX = sysX + sysPadL + ucRx;  // centre of primary column
-      const labelX = primaryColX + ucRx + colGap * 0.45;  // ~45% into the gap
+      const hasRightCol = leafUCs.length>0;
+      const sysW = hasRightCol
+        ? (ucRx*2)*2+colGap+sysPadL+sysPadR
+        : ucRx*2+sysPadL+sysPadR;
+      const bottomActorH = bottomActors.length>0?148:0;
+      const totalW = sysX+sysW+(rightActors.length>0?148:40);
+      const totalH = sysY+sysH+bottomActorH+55;
 
       // Actor positions
       const actorPos = {};
+      const leftIdealY = {};
       leftActors.forEach(a => {
         const ys = relationships.filter(r=>r.from===a.id&&r.type==='association')
           .map(r=>ucPos[r.to]?.y).filter(y=>y!=null);
-        const avgY = ys.length?ys.reduce((s,y)=>s+y,0)/ys.length:sysY+sysH/2;
-        actorPos[a.id] = { x:65, y:avgY, type:a.type||'human' };
+        leftIdealY[a.id] = ys.length?ys.reduce((s,y)=>s+y,0)/ys.length:sysY+sysH/2;
+      });
+      const sortedLeft = [...leftActors].sort((a,b)=>leftIdealY[a.id]-leftIdealY[b.id]);
+      const placedActorYs = [];
+      sortedLeft.forEach(a => {
+        let y = leftIdealY[a.id];
+        for (const py of placedActorYs) { if(Math.abs(y-py)<140) y=py+140; }
+        placedActorYs.push(y);
+        actorPos[a.id] = { x:65, y, type:a.type||'human' };
       });
       rightActors.forEach(a => {
         const ys = relationships.filter(r=>r.from===a.id||r.to===a.id)
           .map(r=>{const oid=r.from===a.id?r.to:r.from;return ucPos[oid]?.y;}).filter(y=>y!=null);
-        const avgY = ys.length?ys.reduce((s,y)=>s+y,0)/ys.length:sysY+sysH/2;
-        actorPos[a.id] = { x:sysX+sysW+75, y:avgY, type:a.type||'system' };
+        actorPos[a.id] = { x:sysX+sysW+75, y:ys.length?ys.reduce((s,y)=>s+y,0)/ys.length:sysY+sysH/2, type:a.type||'system' };
       });
       bottomActors.forEach(a => {
         const xs = relationships.filter(r=>r.from===a.id||r.to===a.id)
           .map(r=>{const oid=r.from===a.id?r.to:r.from;return ucPos[oid]?.x;}).filter(x=>x!=null);
-        const avgX = xs.length?xs.reduce((s,x)=>s+x,0)/xs.length:sysX+sysW/2;
-        actorPos[a.id] = { x:avgX, y:sysY+sysH+84, type:a.type||'system' };
+        actorPos[a.id] = { x:xs.length?xs.reduce((s,x)=>s+x,0)/xs.length:sysX+sysW/2, y:sysY+sysH+84, type:a.type||'system' };
       });
 
       const allPos = { ...ucPos, ...actorPos };
 
       // Edge helpers
-      const outset = 5;
+      const outset=5;
       function ellipseEdge(cx,cy,tx,ty){const a=Math.atan2(ty-cy,tx-cx);return{x:cx+(ucRx+outset)*Math.cos(a),y:cy+(ucRy+outset)*Math.sin(a)};}
       function rectEdge(cx,cy,tx,ty,hw,hh){const a=Math.atan2(ty-cy,tx-cx),c=Math.cos(a),s=Math.sin(a);const sc=Math.min(c!==0?(hw+outset)/Math.abs(c):Infinity,s!==0?(hh+outset)/Math.abs(s):Infinity);return{x:cx+c*sc,y:cy+s*sc};}
       function stickEdge(ax,ay,tx,ty){const a=Math.atan2(ty-ay,tx-ax);return{x:ax+30*Math.cos(a),y:ay+44*Math.sin(a)};}
       function getEdge(id,tx,ty){const pos=allPos[id];if(!pos)return null;if(ucPos[id])return ellipseEdge(pos.x,pos.y,tx,ty);if(pos.type==='system')return rectEdge(pos.x,pos.y,tx,ty,47,24);return stickEdge(pos.x,pos.y,tx,ty);}
 
-      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" style="background:white;font-family:Arial,sans-serif;">`;
-      svg += `<defs><marker id="htri" markerWidth="16" markerHeight="12" refX="15" refY="6" orient="auto"><polygon points="0 0,15 6,0 12" fill="white" stroke="#444" stroke-width="1.3"/></marker></defs>`;
-      svg += `<rect x="${sysX}" y="${sysY}" width="${sysW}" height="${sysH}" fill="white" stroke="#444" stroke-width="1.8"/>`;
-      svg += `<text x="${sysX+sysW/2}" y="${sysY+44}" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">${escXml(systemName)}</text>`;
+      let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" style="background:white;font-family:Arial,sans-serif;">`;
+      svg+=`<defs><marker id="htri" markerWidth="16" markerHeight="12" refX="15" refY="6" orient="auto"><polygon points="0 0,15 6,0 12" fill="white" stroke="#444" stroke-width="1.3"/></marker></defs>`;
+      svg+=`<rect x="${sysX}" y="${sysY}" width="${sysW}" height="${sysH}" fill="white" stroke="#444" stroke-width="1.8"/>`;
+      svg+=`<text x="${sysX+sysW/2}" y="${sysY+44}" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">${escXml(systemName)}</text>`;
 
-      const lineData  = [];
-      const labelData = [];
+      const lineData=[], labelData=[];
+      relationships.forEach(rel=>{
+        const fp=allPos[rel.from],tp=allPos[rel.to]; if(!fp||!tp) return;
+        const isSys=(actorPos[rel.from]&&actorPos[rel.from].type==='system')||(actorPos[rel.to]&&actorPos[rel.to].type==='system');
+        const p1=getEdge(rel.from,tp.x,tp.y),p2=getEdge(rel.to,fp.x,fp.y); if(!p1||!p2) return;
 
-      relationships.forEach(rel => {
-        const fp=allPos[rel.from], tp=allPos[rel.to]; if(!fp||!tp) return;
-        const isSys = (actorPos[rel.from]&&actorPos[rel.from].type==='system') ||
-                      (actorPos[rel.to]  &&actorPos[rel.to].type  ==='system');
-        const p1=getEdge(rel.from,tp.x,tp.y), p2=getEdge(rel.to,fp.x,fp.y); if(!p1||!p2) return;
-
-        if (rel.type==='association') {
+        if(rel.type==='association'){
           lineData.push({type:'assoc',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
-        } else if (rel.type==='generalization') {
+        } else if(rel.type==='generalization'){
           lineData.push({type:'gen',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
-        } else if (isSys) {
-          // System actor: solid plain line, no arrowhead, no label
+        } else if(isSys){
           lineData.push({type:'assoc',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
-        } else if (rel.type==='include') {
-          // Arrow: p1(base) → p2(included)
-          lineData.push({type:'include',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
-          // Label: find y where this line crosses labelX, place label there
-          const dx=p2.x-p1.x, dy=p2.y-p1.y;
-          if (Math.abs(dx) > 1) {
-            const t=(labelX-p1.x)/dx;
-            if (t>0.1 && t<0.9) {
-              const yAtLabel = p1.y + t*dy;
-              labelData.push({text:'<<include>>',x:labelX,y:yAtLabel-14,lineY:yAtLabel});
-            }
+        } else if(rel.type==='include'){
+          const fromPos = ucPos[rel.from], toPos = ucPos[rel.to];
+          // Use L-shaped route only when two left-col UCs have something in between
+          // (distance > 1.5 rowH means an intermediate UC is blocking a clean straight line)
+          const isBlockedLeftLeft = fromPos && toPos &&
+            Math.abs(fromPos.x - toPos.x) < 10 &&
+            toPos.y > fromPos.y &&
+            (toPos.y - fromPos.y) > rowH * 1.5;
+
+          if(isBlockedLeftLeft){
+            const routeX = sysX + 12; // inside the system box left wall
+            const sx = fromPos.x - ucRx - 5, sy = fromPos.y;
+            const tx = toPos.x  - ucRx - 5, ty = toPos.y - 22; // above actor line
+            lineData.push({type:'path', d:`M ${sx.toFixed(1)} ${sy.toFixed(1)} L ${routeX} ${sy.toFixed(1)} L ${routeX} ${ty.toFixed(1)} L ${tx.toFixed(1)} ${ty.toFixed(1)}`});
+            // Label at 75% down the vertical segment to avoid elements near the top
+            const labelY = sy + (ty - sy) * 0.75;
+            labelData.push({text:'<<include>>',x:routeX+52,y:labelY,lineY:labelY});
           } else {
-            // Vertical line — put label to the left
-            const my=(p1.y+p2.y)/2;
-            labelData.push({text:'<<include>>',x:p1.x-55,y:my,lineY:my});
+            lineData.push({type:'include',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
+            const dx=p2.x-p1.x, dy=p2.y-p1.y;
+            if(Math.abs(dx)>1){
+              const t=(labelX-p1.x)/dx;
+              if(t>0.1&&t<0.9){
+                const yAtLabel=p1.y+t*dy;
+                labelData.push({text:'<<include>>',x:labelX,y:yAtLabel-14,lineY:yAtLabel});
+              }
+            } else {
+              const my=(p1.y+p2.y)/2;
+              // Right side of line so it doesn't conflict with L-shape label on the left
+              labelData.push({text:'<<include>>',x:p1.x+55,y:my,lineY:my});
+            }
           }
-        } else if (rel.type==='extend') {
-          // Arrow: p2(secondary) → p1(primary)
-          lineData.push({type:'extend',x1:p2.x,y1:p2.y,x2:p1.x,y2:p1.y});
-          const dx=p2.x-p1.x, dy=p2.y-p1.y;
-          if (Math.abs(dx) > 1) {
-            const t=(labelX-p1.x)/dx;
-            if (t>0.1 && t<0.9) {
-              const yAtLabel = p1.y + t*dy;
-              labelData.push({text:'<<extend>>',x:labelX,y:yAtLabel-14,lineY:yAtLabel});
-            }
+        } else if(rel.type==='extend'){
+          const fromPos2 = ucPos[rel.from], toPos2 = ucPos[rel.to];
+          const isBlockedLeftLeft2 = fromPos2 && toPos2 &&
+            Math.abs(fromPos2.x - toPos2.x) < 10 &&
+            toPos2.y > fromPos2.y &&
+            (toPos2.y - fromPos2.y) > rowH * 1.5;
+
+          if(isBlockedLeftLeft2){
+            const routeX = sysX + 12;
+            const sx = toPos2.x  - ucRx - 5, sy = toPos2.y;
+            const tx = fromPos2.x - ucRx - 5, ty = fromPos2.y;
+            lineData.push({type:'path', d:`M ${sx.toFixed(1)} ${sy.toFixed(1)} L ${routeX} ${sy.toFixed(1)} L ${routeX} ${ty.toFixed(1)} L ${tx.toFixed(1)} ${ty.toFixed(1)}`});
+            const labelY = sy + (ty - sy) * 0.75;
+            labelData.push({text:'<<extend>>',x:routeX+52,y:labelY,lineY:labelY});
           } else {
-            const my=(p1.y+p2.y)/2;
-            labelData.push({text:'<<extend>>',x:p1.x-55,y:my,lineY:my});
+            lineData.push({type:'extend',x1:p2.x,y1:p2.y,x2:p1.x,y2:p1.y});
+            const dx=p2.x-p1.x, dy=p2.y-p1.y;
+            if(Math.abs(dx)>1){
+              const t=(labelX-p1.x)/dx;
+              if(t>0.1&&t<0.9){
+                const yAtLabel=p1.y+t*dy;
+                labelData.push({text:'<<extend>>',x:labelX,y:yAtLabel-14,lineY:yAtLabel});
+              }
+            } else {
+              const my=(p1.y+p2.y)/2;
+              labelData.push({text:'<<extend>>',x:p1.x-55,y:my,lineY:my});
+            }
           }
         }
       });
 
-      // Sort labels by their line crossing y, then enforce minimum 18px vertical gap
+      // Sort by lineY, enforce 18px min gap
       labelData.sort((a,b)=>a.lineY-b.lineY);
-      for (let i=1; i<labelData.length; i++) {
-        const prev=labelData[i-1], cur=labelData[i];
-        const minGap=18;
-        if (cur.y - prev.y < minGap) cur.y = prev.y + minGap;
+      for(let i=1;i<labelData.length;i++){
+        if(labelData[i].y-labelData[i-1].y<18)
+          labelData[i].y=labelData[i-1].y+18;
       }
 
-      // Draw lines
+      // Draw lines FIRST — ellipses drawn on top will cover any overlapping segments
       lineData.forEach(l=>{
-        if(l.type==='assoc')    svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.5"/>`;
+        if(l.type==='assoc') svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.5"/>`;
         else if(l.type==='gen') svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.5" marker-end="url(#htri)"/>`;
         else if(l.type==='include') svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
-        else if(l.type==='extend')  svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
+        else if(l.type==='extend') svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
+        else if(l.type==='path') svg+=`<path d="${l.d}" fill="none" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
       });
 
       // Draw labels
@@ -806,12 +926,11 @@ erDiagram
         svg+=`<text x="${l.x.toFixed(1)}" y="${l.y.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="#333" font-style="italic">${escXml(l.text)}</text>`;
       });
 
-      // Draw use cases on top
+      // Draw use cases ON TOP of lines — white fill covers any line segments passing through
       usecases.forEach(uc=>{
         const pos=ucPos[uc.id]; if(!pos) return;
         svg+=`<ellipse cx="${pos.x}" cy="${pos.y}" rx="${ucRx}" ry="${ucRy}" fill="white" stroke="#555" stroke-width="1.7"/>`;
-        const lines=wrapText(uc.name,18),lh=16;
-        const startY=pos.y-(lines.length-1)*lh/2;
+        const lines=wrapText(uc.name,18),lh=16,startY=pos.y-(lines.length-1)*lh/2;
         lines.forEach((l,i)=>{svg+=`<text x="${pos.x}" y="${(startY+i*lh).toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#111">${escXml(l)}</text>`;});
       });
 
@@ -836,7 +955,7 @@ erDiagram
         if(a.type==='human') drawHuman(pos.x,pos.y,a.name); else drawSystem(pos.x,pos.y,a.name);
       });
 
-      svg += '</svg>';
+      svg+='</svg>';
       return svg;
     }
 
