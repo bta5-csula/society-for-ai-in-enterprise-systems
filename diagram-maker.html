@@ -1015,6 +1015,22 @@ erDiagram
       }
     }
 
+    // Rate limiter — max 5 generations per hour per browser
+    const RATE_LIMIT = 5;
+    const RATE_WINDOW = 60 * 60 * 1000;
+    function checkRateLimit() {
+      const now = Date.now();
+      let log = JSON.parse(localStorage.getItem('saies_rate') || '[]');
+      log = log.filter(t => now - t < RATE_WINDOW);
+      if (log.length >= RATE_LIMIT) {
+        const resetIn = Math.ceil((RATE_WINDOW - (now - log[0])) / 60000);
+        return { allowed: false, resetIn };
+      }
+      log.push(now);
+      localStorage.setItem('saies_rate', JSON.stringify(log));
+      return { allowed: true };
+    }
+
     async function generate() {
       const input = document.getElementById('userInput').value.trim();
       if (!input) return;
@@ -1045,7 +1061,7 @@ erDiagram
         : `${typeInstructions[selectedType]}\n\nUser description: ${input}\n\nReturn ONLY the raw Mermaid diagram code. No explanation, no markdown fences, no backticks. Start directly with the diagram type keyword.`;
 
       try {
-        const res = await fetch('/.netlify/functions/claude', {
+        const res = await fetch('/api/claude', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: userPrompt })
