@@ -1385,7 +1385,13 @@
           </div>
         </div>
 
-        <a href="https://www.calstatela.edu/faculty/ming-wang" target="_blank" rel="noopener noreferrer" class="advisor-card fade-up" style="transition-delay: 0.35s">
+        <a
+          href="https://www.calstatela.edu/faculty/ming-wang"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="advisor-card fade-up"
+          style="transition-delay: 0.35s"
+        >
           <div class="member-avatar" style="flex-shrink: 0">MW</div>
           <div>
             <div class="advisor-label">Faculty Advisor</div>
@@ -1412,7 +1418,10 @@
           class="fade-up"
           style="transition-delay: 0.2s; margin-top: 8px; max-width: 800px"
         >
-          <a href="https://society-for-ai-in-enterprise-systems.vercel.app/diagram-maker.html" class="project-card">
+          <a
+            href="https://society-for-ai-in-enterprise-systems.vercel.app/diagram-maker.html"
+            class="project-card"
+          >
             <div
               style="
                 position: absolute;
@@ -1435,6 +1444,41 @@
               Describe any system in plain English and instantly generate a
               use-case, activity, class, or entity-relationship diagram —
               powered by AI.
+            </p>
+            <div class="project-link">Launch Project —&gt;</div>
+          </a>
+        </div>
+
+        <div
+          class="fade-up"
+          style="transition-delay: 0.3s; margin-top: 16px; max-width: 800px"
+        >
+          <a href="/financial-analysis.html" class="project-card">
+            <div
+              style="
+                position: absolute;
+                top: 40px;
+                right: 40px;
+                font-size: 9px;
+                color: var(--border);
+                letter-spacing: 0.1em;
+                font-family: &quot;JetBrains Mono&quot;, monospace;
+              "
+            >
+              VERSION: 1.0
+            </div>
+
+            <span class="project-tag">Finance // AI Lab</span>
+            <div class="project-title">
+              Corporate Valuation <em>Intelligence</em>
+            </div>
+            <p class="project-desc">
+              AI-assisted corporate valuation platform performing peer
+              comparison, discounted cash-flow modeling, and risk analysis on
+              companies such as NVIDIA and T1 Energy.
+              <!--Does this sound better: AI-driven corporate valuation platform performing peer
+              comparison, discounted cash-flow modeling, and risk analysis on
+              companies such as NVIDIA and T1 Energy.-->
             </p>
             <div class="project-link">Launch Project —&gt;</div>
           </a>
@@ -1585,10 +1629,10 @@
           if (window.scrollY >= s.offsetTop - 100) current = s.id;
         });
         navLinks.forEach((a) => {
-        a.style.color =
-          a.getAttribute("href") === "#" + current ? "var(--gold)" : "";
+          a.style.color =
+            a.getAttribute("href") === "#" + current ? "var(--gold)" : "";
         });
       });
-  </script>
-</body>
+    </script>
+  </body>
 </html>

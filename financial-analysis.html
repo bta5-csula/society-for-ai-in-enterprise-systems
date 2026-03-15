@@ -1,0 +1,2442 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Corporate Valuation Intelligence — SAIES</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #07101f;
+        --bg2: #0b1727;
+        --card: #0d1b2e;
+        --border: #172d47;
+        --border-lt: #1d3a58;
+        --gold: #c9a766;
+        --gold-d: #7a5f2e;
+        --gold-bg: rgba(201, 167, 102, 0.08);
+        --silver: #8faabb;
+        --text: #dae8f3;
+        --dim: #5d7d98;
+        --muted: #2e4862;
+        --green: #4db87f;
+        --green-bg: rgba(77, 184, 127, 0.09);
+        --red: #df5f5f;
+        --yellow: #e0be48;
+        --mono: "JetBrains Mono", monospace;
+        --disp: "Barlow Condensed", sans-serif;
+        --body: "DM Sans", sans-serif;
+        --radius: 4px;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--body);
+        font-size: 15px;
+        line-height: 1.65;
+      }
+      :focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: 2px;
+      }
+
+      /* NAV */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 200;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 48px;
+        background: rgba(7, 16, 31, 0.94);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+      }
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        color: var(--text);
+      }
+      .nav-logo img {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+      }
+      .nav-logo-name {
+        font-family: var(--disp);
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+      }
+      .nav-center {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        color: var(--dim);
+      }
+      .nav-back {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        color: var(--dim);
+        text-decoration: none;
+        transition: color 0.2s;
+        padding: 8px 0;
+      }
+      .nav-back:hover {
+        color: var(--gold);
+      }
+
+      /* HERO */
+      .hero {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 108px 48px 52px;
+      }
+      .hero-eyebrow {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        color: var(--gold);
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .hero-eyebrow::before {
+        content: "";
+        display: block;
+        width: 20px;
+        height: 1px;
+        background: var(--gold);
+      }
+      .hero h1 {
+        font-family: var(--disp);
+        font-size: clamp(38px, 5vw, 64px);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        line-height: 1.05;
+        margin-bottom: 16px;
+      }
+      .hero h1 em {
+        font-style: normal;
+        color: var(--gold);
+      }
+      .hero-sub {
+        font-size: 15px;
+        color: var(--dim);
+        max-width: 620px;
+        line-height: 1.8;
+        margin-bottom: 28px;
+      }
+      .hero-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+      }
+      .chip {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.09em;
+        padding: 5px 12px;
+        border: 1px solid var(--border-lt);
+        color: var(--dim);
+        background: var(--bg2);
+        border-radius: var(--radius);
+      }
+      .chip.ok {
+        border-color: rgba(77, 184, 127, 0.4);
+        color: var(--green);
+        background: var(--green-bg);
+      }
+      .chip.warn {
+        border-color: rgba(224, 190, 72, 0.3);
+        color: var(--yellow);
+        background: rgba(224, 190, 72, 0.07);
+      }
+
+      /* TABS */
+      .tabs-wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 48px;
+      }
+      .tab-nav {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 44px;
+        gap: 4px;
+      }
+      .tab-btn {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 13px 24px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        color: var(--muted);
+        cursor: pointer;
+        transition:
+          color 0.2s,
+          border-color 0.2s;
+        border-radius: var(--radius) var(--radius) 0 0;
+      }
+      .tab-btn:hover {
+        color: var(--silver);
+      }
+      .tab-btn.on {
+        color: var(--gold);
+        border-bottom-color: var(--gold);
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.on {
+        display: block;
+      }
+
+      /* SECTION ANATOMY */
+      .sec-wrap {
+        margin-bottom: 52px;
+      }
+      .sec-head {
+        margin-bottom: 28px;
+      }
+      .sec-title {
+        font-family: var(--disp);
+        font-size: 24px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+      .sec-desc {
+        font-size: 14px;
+        color: var(--dim);
+        max-width: 700px;
+        line-height: 1.8;
+      }
+      .sec-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 44px 0 40px;
+      }
+
+      /* TABLES */
+      .tbl-wrap {
+        overflow-x: auto;
+        margin-bottom: 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+      table.comp {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+      table.comp th {
+        background: var(--bg2);
+        padding: 12px 16px;
+        text-align: left;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dim);
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+      }
+      table.comp th.hl {
+        color: var(--gold);
+        background: var(--gold-bg);
+      }
+      table.comp td {
+        padding: 10px 16px;
+        border-bottom: 1px solid rgba(23, 45, 71, 0.6);
+        color: var(--text);
+        white-space: nowrap;
+      }
+      table.comp td.label {
+        color: var(--dim);
+        font-size: 11px;
+        letter-spacing: 0.03em;
+      }
+      table.comp td.hl {
+        color: var(--gold);
+        background: rgba(201, 167, 102, 0.03);
+      }
+      table.comp tr.group td {
+        background: var(--bg2);
+        color: var(--muted);
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        padding: 6px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      table.comp tr:hover td {
+        background: rgba(255, 255, 255, 0.015);
+      }
+      .pos {
+        color: var(--green) !important;
+      }
+      .neg {
+        color: var(--red) !important;
+      }
+      .nm {
+        color: var(--muted) !important;
+        font-style: italic;
+      }
+
+      /* CHARTS */
+      .chart-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-bottom: 8px;
+      }
+      .chart-box {
+        background: var(--card);
+        border: 1px solid var(--border);
+        padding: 24px 24px 20px;
+        border-radius: var(--radius);
+      }
+      .chart-box-title {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--silver);
+        margin-bottom: 6px;
+      }
+      .chart-box-desc {
+        font-size: 12px;
+        color: var(--dim);
+        margin-bottom: 18px;
+        line-height: 1.6;
+      }
+      .chart-box canvas {
+        max-height: 220px;
+      }
+
+      /* INSIGHT CARDS */
+      .ins-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 13px;
+        margin-bottom: 8px;
+      }
+      .ins-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--gold-d);
+        padding: 20px 22px;
+        border-radius: 0 var(--radius) var(--radius) 0;
+      }
+      .ins-label {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 6px;
+      }
+      .ins-heading {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+      .ins-card p {
+        font-size: 13px;
+        color: var(--dim);
+        line-height: 1.72;
+      }
+
+      /* DCF SCENARIOS */
+      .scen-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 13px;
+        margin-bottom: 20px;
+      }
+      .scen {
+        background: var(--card);
+        border: 1px solid var(--border);
+        padding: 28px 22px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--radius);
+      }
+      .scen::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+      }
+      .scen.bear::before {
+        background: var(--red);
+      }
+      .scen.base::before {
+        background: var(--gold);
+      }
+      .scen.bull::before {
+        background: var(--green);
+      }
+      .scen-case {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      .scen.bear .scen-case {
+        color: var(--red);
+      }
+      .scen.base .scen-case {
+        color: var(--gold);
+      }
+      .scen.bull .scen-case {
+        color: var(--green);
+      }
+      .scen-price {
+        font-family: var(--disp);
+        font-size: 56px;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 4px;
+        transition: all 0.3s ease;
+      }
+      .scen.bear .scen-price {
+        color: var(--red);
+      }
+      .scen.base .scen-price {
+        color: var(--gold);
+      }
+      .scen.bull .scen-price {
+        color: var(--green);
+      }
+      .scen-sub {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        margin-bottom: 16px;
+      }
+      .scen-detail {
+        font-size: 12px;
+        color: var(--dim);
+        line-height: 1.75;
+      }
+
+      /* INTERACTIVE CONTROLS */
+      .dcf-controls {
+        background: var(--card);
+        border: 1px solid var(--border-lt);
+        padding: 28px 32px;
+        margin-bottom: 20px;
+        border-radius: var(--radius);
+      }
+      .dcf-ctrl-hdr {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .dcf-ctrl-title {
+        font-family: var(--disp);
+        font-size: 20px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .dcf-ctrl-desc {
+        font-size: 13px;
+        color: var(--dim);
+        margin-bottom: 24px;
+        line-height: 1.7;
+      }
+      .dcf-ctrl-badge {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 4px 9px;
+        border-radius: var(--radius);
+        background: var(--green-bg);
+        color: var(--green);
+        border: 1px solid rgba(77, 184, 127, 0.3);
+      }
+      .dcf-sliders {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 28px;
+      }
+      .slider-group label {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: 13px;
+        color: var(--silver);
+        margin-bottom: 10px;
+      }
+      .slider-group label span {
+        font-family: var(--mono);
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--gold);
+      }
+      .slider-group input[type="range"] {
+        width: 100%;
+        height: 4px;
+        appearance: none;
+        background: var(--border-lt);
+        border-radius: 2px;
+        cursor: pointer;
+        outline: none;
+      }
+      .slider-group input[type="range"]::-webkit-slider-thumb {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--gold);
+        border: 2px solid var(--bg);
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .slider-group input[type="range"]:hover::-webkit-slider-thumb {
+        background: #d4b880;
+      }
+      .slider-group input[type="range"]::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--gold);
+        border: 2px solid var(--bg);
+        cursor: pointer;
+      }
+      .slider-hint {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .dcf-reset {
+        display: inline-block;
+        margin-top: 20px;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 8px 16px;
+        background: none;
+        border: 1px solid var(--border-lt);
+        color: var(--dim);
+        cursor: pointer;
+        border-radius: var(--radius);
+        transition: all 0.2s;
+      }
+      .dcf-reset:hover {
+        border-color: var(--gold-d);
+        color: var(--gold);
+      }
+
+      /* PROBABILITY BANNER */
+      .prob-banner {
+        background: var(--gold-bg);
+        border: 1px solid var(--gold-d);
+        padding: 22px 28px;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 8px;
+      }
+      .prob-title {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 4px;
+      }
+      .prob-note {
+        font-size: 13px;
+        color: var(--dim);
+        max-width: 400px;
+        line-height: 1.6;
+      }
+      .prob-vals {
+        display: flex;
+        gap: 44px;
+        flex-wrap: wrap;
+      }
+      .prob-item .pv {
+        font-family: var(--disp);
+        font-size: 40px;
+        font-weight: 700;
+        color: var(--gold);
+        line-height: 1;
+      }
+      .prob-item .pd {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+      .prob-delta {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--green);
+      }
+
+      /* RISK TABLE */
+      .risk-wrap {
+        overflow-x: auto;
+        margin-bottom: 8px;
+      }
+      table.risk {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      table.risk thead th {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--dim);
+        padding: 11px 16px;
+        text-align: left;
+        background: var(--bg2);
+        border-bottom: 1px solid var(--border);
+      }
+      table.risk tbody td {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(23, 45, 71, 0.5);
+        vertical-align: top;
+      }
+      table.risk tbody tr:hover td {
+        background: rgba(255, 255, 255, 0.013);
+      }
+      .risk-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 3px;
+      }
+      .risk-note {
+        font-size: 12px;
+        color: var(--dim);
+      }
+      .risk-sens {
+        font-size: 13px;
+        color: var(--dim);
+      }
+      .badge {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.05em;
+        padding: 4px 9px;
+        border-radius: var(--radius);
+        display: inline-block;
+        white-space: nowrap;
+      }
+      .badge-low {
+        background: rgba(77, 184, 127, 0.12);
+        color: var(--green);
+        border: 1px solid rgba(77, 184, 127, 0.25);
+      }
+      .badge-med {
+        background: rgba(224, 190, 72, 0.12);
+        color: var(--yellow);
+        border: 1px solid rgba(224, 190, 72, 0.25);
+      }
+      .badge-high {
+        background: rgba(223, 95, 95, 0.12);
+        color: var(--red);
+        border: 1px solid rgba(223, 95, 95, 0.25);
+      }
+      .badge-ok {
+        background: rgba(77, 184, 127, 0.1);
+        color: var(--green);
+        border: 1px solid rgba(77, 184, 127, 0.2);
+      }
+      .badge-warn {
+        background: rgba(224, 190, 72, 0.1);
+        color: var(--yellow);
+        border: 1px solid rgba(224, 190, 72, 0.2);
+      }
+      .badge-track {
+        background: rgba(143, 170, 187, 0.1);
+        color: var(--silver);
+        border: 1px solid rgba(143, 170, 187, 0.2);
+      }
+
+      /* MILESTONES */
+      .ms-track {
+        border-left: 2px solid var(--border-lt);
+        padding-left: 28px;
+        margin-bottom: 8px;
+      }
+      .ms-item {
+        position: relative;
+        padding: 10px 0;
+      }
+      .ms-item::before {
+        content: "";
+        position: absolute;
+        left: -35px;
+        top: 16px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 2px solid var(--border-lt);
+        background: var(--bg);
+      }
+      .ms-item.done::before {
+        border-color: var(--green);
+        background: var(--green);
+        box-shadow: 0 0 8px rgba(77, 184, 127, 0.4);
+      }
+      .ms-item.pend::before {
+        border-color: var(--yellow);
+      }
+      .ms-item.track::before {
+        border-color: var(--gold);
+        background: rgba(201, 167, 102, 0.3);
+      }
+      .ms-date {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+      .ms-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 2px;
+      }
+      .ms-impact {
+        font-size: 13px;
+        color: var(--dim);
+      }
+
+      /* TAKEAWAYS */
+      .ai-wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 52px 48px 80px;
+        border-top: 1px solid var(--border);
+      }
+      .ai-hdr {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 32px;
+      }
+      .ai-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 10px rgba(77, 184, 127, 0.5);
+        flex-shrink: 0;
+      }
+      .ai-ttl {
+        font-family: var(--disp);
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .ai-sub {
+        font-size: 13px;
+        color: var(--dim);
+        margin-top: 2px;
+      }
+      .tk-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 13px;
+      }
+      .tk-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        padding: 22px 24px;
+        border-radius: var(--radius);
+        border-left: 3px solid var(--border);
+      }
+      .tk-card.tk-nvda {
+        border-left-color: var(--gold);
+      }
+      .tk-card.tk-t1 {
+        border-left-color: var(--silver);
+      }
+      .tk-card.tk-both {
+        border-left-color: var(--green);
+        grid-column: 1 / -1;
+      }
+      .tk-co {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .tk-nvda .tk-co {
+        color: var(--gold);
+      }
+      .tk-t1 .tk-co {
+        color: var(--silver);
+      }
+      .tk-both .tk-co {
+        color: var(--green);
+      }
+      .tk-heading {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 9px;
+      }
+      .tk-card p {
+        font-size: 13px;
+        color: var(--dim);
+        line-height: 1.72;
+      }
+      .tk-card p strong {
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      /* FOOTER */
+      footer {
+        background: var(--bg2);
+        border-top: 1px solid var(--border);
+        padding: 22px 48px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+      }
+
+      /* RESPONSIVE */
+      @media (max-width: 960px) {
+        nav {
+          padding: 0 20px;
+        }
+        .nav-center {
+          display: none;
+        }
+        .hero,
+        .tabs-wrap,
+        .ai-wrap,
+        footer {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+        .chart-row,
+        .ins-grid,
+        .scen-row,
+        .tk-grid,
+        .dcf-sliders {
+          grid-template-columns: 1fr;
+        }
+        .tk-card.tk-both {
+          grid-column: 1;
+        }
+        .tab-btn {
+          padding: 11px 14px;
+          font-size: 10px;
+        }
+        .prob-vals {
+          gap: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="/" class="nav-logo" aria-label="SAIES Home">
+        <img src="img/saies_logo_icon.png" alt="" aria-hidden="true" />
+        <span class="nav-logo-name">SAIES</span>
+      </a>
+      <span class="nav-center" aria-hidden="true"
+        >FINANCE // AI LAB &nbsp;·&nbsp; V1.0</span
+      >
+      <a href="/" class="nav-back">← Main Site</a>
+    </nav>
+
+    <div class="hero">
+      <div class="hero-eyebrow" aria-hidden="true">Finance // AI Lab</div>
+      <h1>Corporate Valuation<br /><em>Intelligence</em></h1>
+      <p class="hero-sub">
+        This project builds the analytical infrastructure for valuing
+        corporations — using peer comparisons, discounted cash flow modeling,
+        and structured risk assessment to find what a company is actually worth
+        and what obstacles could stand in its way.
+      </p>
+      <div class="hero-chips" role="list" aria-label="Project tags">
+        <span class="chip" role="listitem">NVDA — Semiconductors</span>
+        <span class="chip" role="listitem">T1 Energy — Solar</span>
+        <span class="chip ok" role="listitem">✓ FEOC Compliant — Feb 2026</span>
+        <span class="chip" role="listitem">Data as of March 2026</span>
+        <span class="chip warn" role="listitem">⚠ Not Investment Advice</span>
+      </div>
+    </div>
+
+    <div class="tabs-wrap">
+      <div class="tab-nav" role="tablist" aria-label="Analysis sections">
+        <button
+          class="tab-btn on"
+          role="tab"
+          aria-selected="true"
+          aria-controls="tab-nvda"
+          onclick="go('nvda', this)"
+        >
+          NVDA — Peer Comp
+        </button>
+        <button
+          class="tab-btn"
+          role="tab"
+          aria-selected="false"
+          aria-controls="tab-t1c"
+          onclick="go('t1c', this)"
+        >
+          T1 Energy — Peer Comp
+        </button>
+        <button
+          class="tab-btn"
+          role="tab"
+          aria-selected="false"
+          aria-controls="tab-t1v"
+          onclick="go('t1v', this)"
+        >
+          T1 Energy — Valuation
+        </button>
+      </div>
+
+      <!-- ══ NVDA ═══════════════════════════════════════════════════════════════ -->
+      <div class="tab-panel on" id="tab-nvda" role="tabpanel">
+        <div class="sec-wrap">
+          <div class="sec-head">
+            <div class="sec-title">
+              How Does NVIDIA Stack Up Against Its Peers?
+            </div>
+            <p class="sec-desc">
+              A peer comp table benchmarks a company against its closest
+              competitors across the same financial metrics — revenue growth,
+              profit margins, and valuation multiples. The goal is to determine
+              whether a stock is cheap or expensive relative to what the market
+              charges for similar businesses.
+            </p>
+          </div>
+          <div class="tbl-wrap">
+            <table
+              class="comp"
+              aria-label="NVIDIA semiconductor peer comparison"
+            >
+              <thead>
+                <tr>
+                  <th scope="col">Metric</th>
+                  <th scope="col" class="hl">NVDA</th>
+                  <th scope="col">
+                    AVGO
+                    <span style="color: var(--gold); font-size: 9px"
+                      >★★★★★</span
+                    >
+                  </th>
+                  <th scope="col">
+                    AMD
+                    <span style="color: var(--gold); font-size: 9px">★★★★</span>
+                  </th>
+                  <th scope="col">
+                    MRVL
+                    <span style="color: var(--gold); font-size: 9px">★★★</span>
+                  </th>
+                  <th scope="col">
+                    INTC
+                    <span style="color: var(--gold); font-size: 9px">★★</span>
+                  </th>
+                  <th scope="col">
+                    QCOM
+                    <span style="color: var(--gold); font-size: 9px">★</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="group">
+                  <td colspan="7">Revenue &amp; Growth</td>
+                </tr>
+                <tr>
+                  <td class="label">TTM Revenue</td>
+                  <td class="hl">$216B</td>
+                  <td>$68B</td>
+                  <td>$26B</td>
+                  <td>$7B</td>
+                  <td>$53B</td>
+                  <td>$48B</td>
+                </tr>
+                <tr>
+                  <td class="label">Year-over-Year Growth</td>
+                  <td class="hl pos">+65%</td>
+                  <td class="pos">+29%</td>
+                  <td class="pos">+34%</td>
+                  <td class="pos">+40%</td>
+                  <td class="neg">−1%</td>
+                  <td class="pos">+5%</td>
+                </tr>
+                <tr>
+                  <td class="label">Next-12-Month Revenue Est.</td>
+                  <td class="hl">$195B</td>
+                  <td>$78B</td>
+                  <td>$31B</td>
+                  <td>$9B</td>
+                  <td>$53B</td>
+                  <td>$50B</td>
+                </tr>
+                <tr class="group">
+                  <td colspan="7">Profitability &amp; Margins</td>
+                </tr>
+                <tr>
+                  <td class="label">Gross Margin</td>
+                  <td class="hl pos">74.8%</td>
+                  <td class="pos">77.0%</td>
+                  <td>57.0%</td>
+                  <td>60.0%</td>
+                  <td>35.0%</td>
+                  <td>56.0%</td>
+                </tr>
+                <tr>
+                  <td class="label">EBITDA Margin</td>
+                  <td class="hl pos">62.0%</td>
+                  <td class="pos">58.0%</td>
+                  <td>25.0%</td>
+                  <td>28.0%</td>
+                  <td class="nm">N/M</td>
+                  <td>32.0%</td>
+                </tr>
+                <tr>
+                  <td class="label">Net Income Margin</td>
+                  <td class="hl pos">55.6%</td>
+                  <td>11.0%</td>
+                  <td>6.0%</td>
+                  <td class="nm">N/M</td>
+                  <td class="nm">N/M</td>
+                  <td>25.0%</td>
+                </tr>
+                <tr>
+                  <td class="label">R&amp;D as % of Revenue</td>
+                  <td class="hl">10.2%</td>
+                  <td>8.5%</td>
+                  <td>22.0%</td>
+                  <td>28.0%</td>
+                  <td>23.0%</td>
+                  <td>22.0%</td>
+                </tr>
+                <tr class="group">
+                  <td colspan="7">Valuation Multiples</td>
+                </tr>
+                <tr>
+                  <td class="label">Forward P/E — NTM</td>
+                  <td class="hl">22.6×</td>
+                  <td>25.9×</td>
+                  <td>30.4×</td>
+                  <td>24.7×</td>
+                  <td>97.0×</td>
+                  <td>13.0×</td>
+                </tr>
+                <tr>
+                  <td class="label">EV / EBITDA</td>
+                  <td class="hl">35×</td>
+                  <td>45×</td>
+                  <td>48×</td>
+                  <td>30×</td>
+                  <td>14×</td>
+                  <td>11×</td>
+                </tr>
+                <tr>
+                  <td class="label">EV / Revenue</td>
+                  <td class="hl">21.7×</td>
+                  <td>26.1×</td>
+                  <td>12.0×</td>
+                  <td>8.4×</td>
+                  <td>0.9×</td>
+                  <td>3.5×</td>
+                </tr>
+                <tr>
+                  <td class="label">
+                    PEG Ratio
+                    <span style="color: var(--muted); font-size: 10px"
+                      >(lower = better value for growth)</span
+                    >
+                  </td>
+                  <td class="hl pos">0.62</td>
+                  <td class="pos">0.64</td>
+                  <td>0.72</td>
+                  <td>0.62</td>
+                  <td class="nm">N/M</td>
+                  <td>0.50</td>
+                </tr>
+                <tr class="group">
+                  <td colspan="7">Per Share &amp; Market Data</td>
+                </tr>
+                <tr>
+                  <td class="label">Current Price (approx.)</td>
+                  <td class="hl">$115</td>
+                  <td>$215</td>
+                  <td>$103</td>
+                  <td>$67</td>
+                  <td>$22</td>
+                  <td>$155</td>
+                </tr>
+                <tr>
+                  <td class="label">NTM EPS (consensus)</td>
+                  <td class="hl">$4.27</td>
+                  <td>$7.00</td>
+                  <td>$3.38</td>
+                  <td>$2.73</td>
+                  <td>$0.23</td>
+                  <td>$10.50</td>
+                </tr>
+                <tr>
+                  <td class="label">52-Week Return</td>
+                  <td class="hl pos">+64%</td>
+                  <td class="pos">+77%</td>
+                  <td class="pos">+106%</td>
+                  <td class="neg">−26%</td>
+                  <td class="nm">N/M</td>
+                  <td>0%</td>
+                </tr>
+                <tr>
+                  <td class="label">Beta (volatility vs. market)</td>
+                  <td class="hl">2.37</td>
+                  <td>1.26</td>
+                  <td>2.02</td>
+                  <td>1.98</td>
+                  <td>1.50</td>
+                  <td>1.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sec-divider"></div>
+
+        <div class="sec-wrap">
+          <div class="sec-head">
+            <div class="sec-title">Implied Price Targets</div>
+            <p class="sec-desc">
+              By applying each peer's valuation multiples to NVIDIA's own
+              financials, we can estimate what NVDA "should" trade at if the
+              market priced it like its closest competitors. Bear = −20% from
+              peer median, Base = peer median, Bull = +20%.
+            </p>
+          </div>
+          <div class="chart-row">
+            <div class="chart-box">
+              <div class="chart-box-title">
+                Implied Price by Method — Bear / Base / Bull
+              </div>
+              <div class="chart-box-desc">
+                Four valuation approaches, three scenarios each. The EV/EBITDA
+                method ($245 base) significantly overshoots — the Average column
+                ($115 base) is the most reliable anchor and aligns with the
+                current price.
+              </div>
+              <canvas
+                id="cNvdaPT"
+                aria-label="NVDA implied price targets chart"
+              ></canvas>
+            </div>
+            <div class="chart-box">
+              <div class="chart-box-title">
+                Margin Profile — NVDA vs. Top Comps
+              </div>
+              <div class="chart-box-desc">
+                NVDA and AVGO run near-identical gross margins (~75–77%), a rare
+                match in semiconductors. This margin parity is the core reason
+                AVGO is the strongest comp for NVDA.
+              </div>
+              <canvas id="cNvdaM" aria-label="Margin comparison chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-divider"></div>
+
+        <div class="sec-wrap">
+          <div class="sec-head">
+            <div class="sec-title">Key Takeaways</div>
+          </div>
+          <div class="ins-grid">
+            <div class="ins-card">
+              <div class="ins-label">Finding #1</div>
+              <div class="ins-heading">NVDA is cheaper than it looks</div>
+              <p>
+                At 22.6× forward P/E, NVIDIA trades 21.6% below the
+                semiconductor sector median of 28.9×. For the dominant AI
+                infrastructure company with 65% revenue growth, this discount is
+                counterintuitive — and is the model's central thesis.
+              </p>
+            </div>
+            <div class="ins-card">
+              <div class="ins-label">Finding #2</div>
+              <div class="ins-heading">
+                Growth-adjusted (PEG 0.62), NVDA is not expensive
+              </div>
+              <p>
+                The PEG ratio adjusts P/E for growth rate. NVDA's 0.62 is lower
+                than AMD's 0.72 and nearly identical to AVGO's 0.64 — the
+                strongest quantitative argument that NVDA is fairly valued or
+                cheap relative to how fast it's growing.
+              </p>
+            </div>
+            <div class="ins-card">
+              <div class="ins-label">Why AVGO is the #1 Comp</div>
+              <div class="ins-heading">
+                Same customers, same margins, lower risk
+              </div>
+              <p>
+                Both NVDA and AVGO sell to the same hyperscaler customers
+                (Amazon, Google, Meta) and run ~75–77% gross margins — rare in
+                semiconductors. AVGO's lower beta (1.26 vs. NVDA's 2.37)
+                suggests NVDA may be underpriced on a risk-adjusted basis.
+              </p>
+            </div>
+            <div class="ins-card">
+              <div class="ins-label">The Premium Puzzle</div>
+              <div class="ins-heading">
+                AMD trades higher than NVDA despite weaker margins
+              </div>
+              <p>
+                AMD trades at 30.4× forward P/E versus NVDA's 22.6× — AMD is
+                more expensive despite 57% gross margins versus NVDA's 75%. The
+                market appears to be pricing in continued erosion of NVDA's
+                dominant GPU market position.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /nvda -->
+
+      <!-- ══ T1 COMP ════════════════════════════════════════════════════════════ -->
+      <div class="tab-panel" id="tab-t1c" role="tabpanel">
+        <div class="sec-wrap">
+          <div class="sec-head">
+            <div class="sec-title">T1 Energy vs. Its Solar Peers</div>
+            <p class="sec-desc">
+              T1 Energy is a small, pre-profitability U.S. solar manufacturer
+              heavily dependent on federal tax credits. This comp table shows
+              where it stands today relative to the profitable companies it
+              aspires to become — and what the path to maturity looks like.
+            </p>
+          </div>
+          <div class="tbl-wrap">
+            <table class="comp" aria-label="T1 Energy solar peer comparison">
+              <thead>
+                <tr>
+                  <th scope="col">Metric</th>
+                  <th scope="col" class="hl">T1 Energy (TE)</th>
+                  <th scope="col">
+                    FSLR
+                    <span style="color: var(--gold); font-size: 9px"
+                      >★★★★★</span
+                    >
+                  </th>
+                  <th scope="col">
+                    CSIQ
+                    <span style="color: var(--gold); font-size: 9px">★★★</span>
+                  </th>
+                  <th scope="col">
+                    JKS
+                    <span style="color: var(--gold); font-size: 9px">★★</span>
+                  </th>
+                  <th scope="col">
+                    DQ
+                    <span style="color: var(--gold); font-size: 9px">★★</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="group">
+                  <td colspan="6">Revenue &amp; Scale</td>
+                </tr>
+                <tr>
+                  <td class="label">TTM Revenue</td>
+                  <td class="hl">$530M</td>
+                  <td>$4.2B</td>
+                  <td>$5.92B</td>
+                  <td>$9.64B</td>
+                  <td>$1.1B</td>
+                </tr>
+                <tr>
+                  <td class="label">Market Cap</td>
+                  <td class="hl">$350M</td>
+                  <td>$21.0B</td>
+                  <td>$1.39B</td>
+                  <td>$1.43B</td>
+                  <td>$680M</td>
+                </tr>
+                <tr>
+                  <td class="label">Enterprise Value</td>
+                  <td class="hl">$1.5B</td>
+                  <td>$18.45B</td>
+                  <td>$6.05B</td>
+                  <td>$3.99B</td>
+                  <td>$550M</td>
+                </tr>
+                <tr>
+                  <td class="label">Manufacturing Capacity</td>
+                  <td class="hl">5 GW (G1)</td>
+                  <td>~20 GW</td>
+                  <td>~30 GW</td>
+                  <td>~130 GW</td>
+                  <td>~105K MT poly</td>
+                </tr>
+                <tr class="group">
+                  <td colspan="6">Profitability &amp; Margins</td>
+                </tr>
+                <tr>
+                  <td class="label">Gross Margin</td>
+                  <td class="hl">10%</td>
+                  <td class="pos">40.8%</td>
+                  <td>17.2%</td>
+                  <td>7.3%</td>
+                  <td>15%</td>
+                </tr>
+                <tr>
+                  <td class="label">EBITDA Margin</td>
+                  <td class="hl neg">Negative</td>
+                  <td class="pos">~34%</td>
+                  <td>6%</td>
+                  <td class="nm">N/M</td>
+                  <td>8%</td>
+                </tr>
+                <tr>
+                  <td class="label">Adjusted EBITDA</td>
+                  <td class="hl neg">−$18.6M</td>
+                  <td class="pos">$1,428M</td>
+                  <td>$355M</td>
+                  <td class="nm">N/M</td>
+                  <td>$88M</td>
+                </tr>
+                <tr>
+                  <td class="label">45X Credits as % of Gross Profit</td>
+                  <td class="hl" style="color: var(--yellow)">~100%</td>
+                  <td style="color: var(--yellow)">~55%</td>
+                  <td>Minimal</td>
+                  <td>None</td>
+                  <td>None</td>
+                </tr>
+                <tr class="group">
+                  <td colspan="6">Valuation Multiples</td>
+                </tr>
+                <tr>
+                  <td class="label">EV / EBITDA</td>
+                  <td class="hl nm">N/M</td>
+                  <td>8.7×</td>
+                  <td>17×</td>
+                  <td class="nm">N/M</td>
+                  <td>6.2×</td>
+                </tr>
+                <tr>
+                  <td class="label">EV / Revenue</td>
+                  <td class="hl">2.8×</td>
+                  <td>4.4×</td>
+                  <td>1.0×</td>
+                  <td>0.4×</td>
+                  <td>0.5×</td>
+                </tr>
+                <tr>
+                  <td class="label">Price / Book Value</td>
+                  <td class="hl">0.4×</td>
+                  <td>2.1×</td>
+                  <td>0.3×</td>
+                  <td>0.2×</td>
+                  <td>0.4×</td>
+                </tr>
+                <tr>
+                  <td class="label">Forward P/E</td>
+                  <td class="hl nm">N/M</td>
+                  <td>10.6×</td>
+                  <td class="nm">N/M</td>
+                  <td class="nm">N/M</td>
+                  <td class="nm">N/M</td>
+                </tr>
+                <tr class="group">
+                  <td colspan="6">Policy &amp; Compliance</td>
+                </tr>
+                <tr>
+                  <td class="label">IRA / 45X Eligibility</td>
+                  <td class="hl pos">✅ Confirmed Feb 2026</td>
+                  <td class="pos">✅ Core to model</td>
+                  <td>⚠️ Partial</td>
+                  <td>⚠️ FEOC risk</td>
+                  <td class="neg">❌ Not eligible</td>
+                </tr>
+                <tr>
+                  <td class="label">Current Price (approx.)</td>
+                  <td class="hl">$2.08</td>
+                  <td>$189</td>
+                  <td>$20.80</td>
+                  <td>$23.80</td>
+                  <td>$21.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sec-divider"></div>
+
+        <div class="sec-wrap">
+          <div class="sec-head">
+            <div class="sec-title">Implied Price Targets from First Solar</div>
+            <p class="sec-desc">
+              First Solar (FSLR) is T1's primary comparable — both are U.S.-only
+              manufacturers anchored by federal 45X tax credits. Applying FSLR's
+              current and historical valuation multiples to T1's financials
+              estimates what T1 could be worth at different stages of growth.
+            </p>
+          </div>
+          <div class="chart-row">
+            <div class="chart-box">
+              <div class="chart-box-title">
+                Implied Prices by Method — Bear / Base / Bull
+              </div>
+              <div class="chart-box-desc">
+                The long-run EV/EBITDA method drives the bull case (~$18–$33).
+                The FY2025 EBITDA method returns negative numbers — because T1's
+                $547M debt currently exceeds its earnings-derived equity value.
+              </div>
+              <canvas
+                id="cT1PT"
+                aria-label="T1 Energy implied price targets"
+              ></canvas>
+            </div>
+            <div class="chart-box">
+              <div class="chart-box-title">
+                Gross Margin — T1 vs. Solar Peers
+              </div>
+              <div class="chart-box-desc">
+                FSLR's 40.8% gross margin is T1's long-run target. At 10% today,
+                T1 is where FSLR was before its second factory and 45X credits
+                fully kicked in — on the same curve, approximately 5 years
+                behind.
+              </div>
+              <canvas
+                id="cT1M"
+                aria-label="Solar peer gross margin comparison"
+              ></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-divider"></div>
+
+        <div class="sec-wrap">
+          <div class="sec-head">
+            <div class="sec-title">Key Takeaways</div>
+          </div>
+          <div class="ins-grid">
+            <div class="ins-card">
+              <div class="ins-label">Why FSLR Is the Primary Comp</div>
+              <div class="ins-heading">
+                Same policy dependency, same U.S.-first strategy
+              </div>
+              <p>
+                Both T1 and First Solar anchor their profitability on Section
+                45X manufacturing tax credits. FSLR accrued ~$1.65B in credits
+                in 2025; T1 accrued $93M in Q3 alone. Neither sources from
+                China, making them the two purest IRA beneficiaries in solar
+                manufacturing.
+              </p>
+            </div>
+            <div class="ins-card">
+              <div class="ins-label">The Bull Case in One Line</div>
+              <div class="ins-heading">
+                G2 execution at FSLR's multiple = ~9× upside
+              </div>
+              <p>
+                Applying FSLR's 8.7× EV/EBITDA to T1's long-run EBITDA target
+                ($375–450M) implies a base price of ~$18 versus the current
+                $2.08. That 9× return is entirely contingent on the G2_Austin
+                factory coming online by Q4 2026 and the $300M debt financing
+                being secured.
+              </p>
+            </div>
+            <div class="ins-card">
+              <div class="ins-label">The Margin Gap to Close</div>
+              <div class="ins-heading">
+                10% today → 40% target: here's the path
+              </div>
+              <p>
+                T1's 10% gross margin will grow as (1) the G2 cell factory
+                reduces module costs and (2) 45X credits scale with production
+                volume. FSLR achieved ~40% only after its second factory was
+                fully online — T1 is on the same curve, approximately 5 years
+                behind.
+              </p>
+            </div>
+            <div class="ins-card">
+              <div class="ins-label">⚠ The Warning Label</div>
+              <div class="ins-heading">
+                JinkoSolar: what failure at scale looks like
+              </div>
+              <p>
+                JKS is the world's largest solar manufacturer by volume (130 GW)
+                yet its gross margin collapsed from 16% to 7.3% in two years —
+                losing $480M. T1 must secure long-term sales contracts before
+                building G2, or risk becoming a high-volume, low-margin
+                commodity manufacturer.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /t1c -->
+
+      <!-- ══ T1 VALUATION ═══════════════════════════════════════════════════════ -->
+      <div class="tab-panel" id="tab-t1v" role="tabpanel">
+        <div class="sec-wrap">
+          <div class="sec-head">
+            <div class="sec-title">What Is T1 Energy Actually Worth?</div>
+            <p class="sec-desc">
+              A DCF (Discounted Cash Flow) model estimates a company's value
+              today based on the cash it's expected to generate in the future.
+              Three scenarios reflect different assumptions about how much
+              profit T1's factories will eventually produce. The controls below
+              let you adjust the key assumptions and see how the valuation
+              responds — this is the core of the analytical infrastructure this
+              project is building.
+            </p>
+          </div>
+
+          <div class="dcf-controls">
+            <div class="dcf-ctrl-hdr">
+              <div class="dcf-ctrl-title">Adjust the Model Assumptions</div>
+              <span class="dcf-ctrl-badge">Live Calculation</span>
+            </div>
+            <p class="dcf-ctrl-desc">
+              The spreadsheet model uses blue "input" cells to drive all
+              calculations. These sliders expose those same inputs — move them
+              to explore how sensitive the valuation is to each assumption.
+            </p>
+            <div class="dcf-sliders">
+              <div class="slider-group">
+                <label for="sliderWacc">
+                  Discount Rate (WACC)
+                  <span id="valWacc">18%</span>
+                </label>
+                <input
+                  type="range"
+                  id="sliderWacc"
+                  min="10"
+                  max="30"
+                  step="1"
+                  value="18"
+                  aria-label="Adjust discount rate"
+                  oninput="updateDCF()"
+                />
+                <div class="slider-hint">
+                  Default 18% — elevated to reflect execution and dilution risk
+                </div>
+              </div>
+              <div class="slider-group">
+                <label for="sliderMult">
+                  EV / EBITDA Exit Multiple
+                  <span id="valMult">10×</span>
+                </label>
+                <input
+                  type="range"
+                  id="sliderMult"
+                  min="6"
+                  max="18"
+                  step="0.5"
+                  value="10"
+                  aria-label="Adjust EBITDA multiple"
+                  oninput="updateDCF()"
+                />
+                <div class="slider-hint">
+                  Default 10× — manufacturing / industrial comps (FSLR currently
+                  trades at 8.7×)
+                </div>
+              </div>
+              <div class="slider-group">
+                <label for="sliderYears">
+                  Years to Full Ramp
+                  <span id="valYears">3</span>
+                </label>
+                <input
+                  type="range"
+                  id="sliderYears"
+                  min="2"
+                  max="6"
+                  step="1"
+                  value="3"
+                  aria-label="Adjust years to full ramp"
+                  oninput="updateDCF()"
+                />
+                <div class="slider-hint">
+                  Default 3 yrs — G1 + G2 Phase 1 fully online by 2028
+                </div>
+              </div>
+            </div>
+            <button class="dcf-reset" onclick="resetDCF()">
+              ↺ Reset to Defaults
+            </button>
+          </div>
+
+          <div
+            class="scen-row"
+            role="region"
+            aria-live="polite"
+            aria-label="Scenario valuations"
+          >
+            <div class="scen bear">
+              <div class="scen-case">Bear Case</div>
+              <div class="scen-price" id="priceBear">$5.24</div>
+              <div class="scen-sub">PV PER SHARE TODAY</div>
+              <div class="scen-detail" id="detailBear">
+                Run-rate EBITDA: $200M<br />Post-FEOC Probability:
+                <strong>28%</strong>
+              </div>
+            </div>
+            <div class="scen base">
+              <div class="scen-case">Base Case</div>
+              <div class="scen-price" id="priceBase">$11.57</div>
+              <div class="scen-sub">PV PER SHARE TODAY</div>
+              <div class="scen-detail" id="detailBase">
+                Run-rate EBITDA: $375M<br />Post-FEOC Probability:
+                <strong>38%</strong>
+              </div>
+            </div>
+            <div class="scen bull">
+              <div class="scen-case">Bull Case</div>
+              <div class="scen-price" id="priceBull">$14.27</div>
+              <div class="scen-sub">PV PER SHARE TODAY</div>
+              <div class="scen-detail" id="detailBull">
+                Run-rate EBITDA: $450M<br />Post-FEOC Probability:
+                <strong>25%</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="prob-banner">
+            <div>
+              <div class="prob-title">Probability-Weighted Fair Value</div>
+              <p class="prob-note">
+                Four scenarios weighted by estimated probability. The FEOC
+                guidance (Feb 2026) shifted odds toward the upside scenarios,
+                raising the probability-weighted average by $1.95.
+              </p>
+            </div>
+            <div class="prob-vals">
+              <div class="prob-item">
+                <div class="pv">$7.54</div>
+                <div class="pd">Pre-FEOC Update</div>
+              </div>
+              <div class="prob-item">
+                <div class="pv">$9.49</div>
+                <div class="pd">Post-FEOC Update</div>
+              </div>
+            </div>
+            <div class="prob-delta">
+              +$1.95 (+26%) — driven by risk reduction, not new value creation
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-divider"></div>
+
+        <div class="sec-wrap">
+          <div class="sec-head">
+            <div class="sec-title">Scenarios vs. Current Price</div>
+            <p class="sec-desc">
+              The current stock price is $2.08. Even the bear case ($5.24)
+              implies a 2.5× return — but only if T1 avoids its most dangerous
+              risk: a dilutive equity raise forced by the $300M financing gap.
+            </p>
+          </div>
+          <div class="chart-row">
+            <div class="chart-box">
+              <div class="chart-box-title">
+                All Scenarios vs. Current Price ($2.08)
+              </div>
+              <div class="chart-box-desc">
+                Updates live as you adjust the model above. Distressed and Bear
+                reflect financing failure or construction delays. Base and Bull
+                require G2 Phase 1 on schedule.
+              </div>
+              <canvas id="cDcf" aria-label="DCF scenario chart"></canvas>
+            </div>
+            <div class="chart-box">
+              <div class="chart-box-title">
+                Post-FEOC Probability Distribution
+              </div>
+              <div class="chart-box-desc">
+                Probabilities were revised upward for Bull and Base scenarios
+                after Treasury confirmed T1's 45X eligibility in February 2026,
+                sharply reducing the distressed scenario probability (20% → 9%).
+              </div>
+              <canvas
+                id="cProb"
+                aria-label="Scenario probability distribution"
+              ></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-divider"></div>
+
+        <div class="sec-wrap">
+          <div class="sec-head">
+            <div class="sec-title">Risk Matrix</div>
+            <p class="sec-desc">
+              These are the "walls" the company may fall against — each factor
+              that could prevent T1 from reaching its long-run EBITDA target,
+              and by extension, any of the upside scenarios above.
+            </p>
+          </div>
+          <div class="risk-wrap">
+            <table class="risk" aria-label="T1 Energy risk matrix">
+              <thead>
+                <tr>
+                  <th scope="col" style="width: 33%">Risk Factor</th>
+                  <th scope="col">Likelihood</th>
+                  <th scope="col">Impact</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">What It Means for Valuation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="risk-name">
+                      FEOC / 45X Tax Credit Compliance
+                    </div>
+                    <div class="risk-note">
+                      Treasury guidance validated the Dec 2025 restructuring
+                    </div>
+                  </td>
+                  <td><span class="badge badge-low">Low</span></td>
+                  <td><span class="badge badge-high">Very High</span></td>
+                  <td><span class="badge badge-ok">✅ De-risked</span></td>
+                  <td class="risk-sens">
+                    Probability-weighted FV rose +$1.95 after this cleared
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="risk-name">G2 Debt Financing Gap (~$300M)</div>
+                    <div class="risk-note">
+                      Most critical near-term item — no announcement yet
+                    </div>
+                  </td>
+                  <td><span class="badge badge-med">Medium</span></td>
+                  <td><span class="badge badge-high">Very High</span></td>
+                  <td><span class="badge badge-warn">⚠ Unresolved</span></td>
+                  <td class="risk-sens">
+                    Failure forces a dilutive equity raise, reducing per-share
+                    value
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="risk-name">
+                      Offtake Customer Dispute — $53.2M Impairment
+                    </div>
+                    <div class="risk-note">
+                      Company believes its contractual position is strong
+                    </div>
+                  </td>
+                  <td><span class="badge badge-med">Medium</span></td>
+                  <td><span class="badge badge-high">High</span></td>
+                  <td><span class="badge badge-warn">⚠ Unresolved</span></td>
+                  <td class="risk-sens">
+                    Further write-downs possible; may signal customer
+                    relationship issues
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="risk-name">Equity Dilution (Common Shares)</div>
+                    <div class="risk-note">
+                      Preferred stock has payment priority over common
+                      shareholders
+                    </div>
+                  </td>
+                  <td><span class="badge badge-high">High</span></td>
+                  <td><span class="badge badge-high">High</span></td>
+                  <td><span class="badge badge-warn">⚠ Ongoing</span></td>
+                  <td class="risk-sens">
+                    Every 10% share dilution reduces per-share value by ~10%
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="risk-name">
+                      G2 Production Timeline (Q4 2026)
+                    </div>
+                    <div class="risk-note">
+                      Construction confirmed started Q4 2025
+                    </div>
+                  </td>
+                  <td><span class="badge badge-low">Low–Med</span></td>
+                  <td><span class="badge badge-med">Medium</span></td>
+                  <td><span class="badge badge-track">🔄 On Track</span></td>
+                  <td class="risk-sens">
+                    Each quarter of delay ≈ ~$90M in lost future EBITDA
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="risk-name">IRA / 45X Policy Changes</div>
+                    <div class="risk-note">
+                      Initial read on current legislation was positive
+                    </div>
+                  </td>
+                  <td><span class="badge badge-low">Low</span></td>
+                  <td><span class="badge badge-high">High</span></td>
+                  <td>
+                    <span class="badge badge-ok">✅ Favorable so far</span>
+                  </td>
+                  <td class="risk-sens">
+                    Binary — removing 45X credits would eliminate the entire
+                    EBITDA model
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="risk-name">
+                      Related-Party Revenue Concentration
+                    </div>
+                    <div class="risk-note">
+                      57% of Q3 2025 revenue came from related parties
+                    </div>
+                  </td>
+                  <td><span class="badge badge-low">Low</span></td>
+                  <td><span class="badge badge-med">Medium</span></td>
+                  <td><span class="badge badge-warn">⚠ Monitor</span></td>
+                  <td class="risk-sens">
+                    Revenue would fall sharply if this relationship changes
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sec-divider"></div>
+
+        <div class="sec-wrap">
+          <div class="sec-head">
+            <div class="sec-title">Milestone Tracker</div>
+            <p class="sec-desc">
+              The valuation is only achievable if these operational milestones
+              are hit in sequence. Completed items have already de-risked the
+              model; pending items are what the market is waiting to see.
+            </p>
+          </div>
+          <div class="ms-track">
+            <div class="ms-item done">
+              <div class="ms-date">NOV 2025</div>
+              <div class="ms-name">✅ G2 Engineering 60% Complete</div>
+              <div class="ms-impact">
+                Completed ahead of schedule — reduces construction timeline risk
+                for Phase 1
+              </div>
+            </div>
+            <div class="ms-item done">
+              <div class="ms-date">DEC 30, 2025</div>
+              <div class="ms-name">
+                ✅ FEOC Compliance Restructuring Complete
+              </div>
+              <div class="ms-impact">
+                Equity, debt, and IP restructuring done — unlocks full 45X
+                credit eligibility from 2026 onward
+              </div>
+            </div>
+            <div class="ms-item done">
+              <div class="ms-date">Q4 2025</div>
+              <div class="ms-name">✅ G2_Austin Construction Started</div>
+              <div class="ms-impact">
+                Commits the $400–425M Phase 1 capital program; Phase 1 = 2.1 GW
+                of new cell manufacturing capacity
+              </div>
+            </div>
+            <div class="ms-item done">
+              <div class="ms-date">FEB 2026</div>
+              <div class="ms-name">
+                ✅ U.S. Treasury Confirms FEOC Guidance as Positive
+              </div>
+              <div class="ms-impact">
+                Probability-weighted fair value rose $7.54 → $9.49 (+$1.95,
+                +26%) — entirely from risk reduction, not new earnings
+              </div>
+            </div>
+            <div class="ms-item pend">
+              <div class="ms-date">YEAR-END 2025 — STATUS UNKNOWN</div>
+              <div class="ms-name">
+                ⏳ At Least 1 G2 Offtake Contract Signed
+              </div>
+              <div class="ms-impact">
+                A signed customer purchase agreement is the prerequisite for the
+                $300M debt financing — lenders won't commit without it
+              </div>
+            </div>
+            <div class="ms-item pend">
+              <div class="ms-date">2026 — PENDING — HIGHEST PRIORITY ITEM</div>
+              <div class="ms-name">⏳ G2 Debt Financing (~$300M) Secured</div>
+              <div class="ms-impact">
+                Failure here forces an equity raise that dilutes existing
+                shareholders — the single biggest near-term risk in the model
+              </div>
+            </div>
+            <div class="ms-item track">
+              <div class="ms-date">Q4 2026 — ON TRACK</div>
+              <div class="ms-name">🔄 G2 Phase 1 Production Starts</div>
+              <div class="ms-impact">
+                When the factory switches on, 45X cell credits begin flowing —
+                the largest single value unlock in the entire model
+              </div>
+            </div>
+            <div class="ms-item track">
+              <div class="ms-date">2027–2028 — TARGET</div>
+              <div class="ms-name">
+                🔄 G1 + G2 Full Run-Rate EBITDA ($375–450M)
+              </div>
+              <div class="ms-impact">
+                Both factories at full capacity — the assumption underlying all
+                three DCF scenarios. This is what the entire valuation is
+                ultimately a bet on.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /t1v -->
+    </div>
+    <!-- /tabs-wrap -->
+
+    <!-- TAKEAWAYS -->
+    <div class="ai-wrap">
+      <div class="ai-hdr">
+        <div class="ai-dot" aria-hidden="true"></div>
+        <div>
+          <div class="ai-ttl">Analyst Takeaways</div>
+          <div class="ai-sub">
+            Cross-model synthesis — built by SAIES members
+          </div>
+        </div>
+      </div>
+      <div class="tk-grid">
+        <div class="tk-card tk-nvda">
+          <div class="tk-co">NVDA</div>
+          <div class="tk-heading">
+            Dominant franchise, priced below the sector median
+          </div>
+          <p>
+            At 22.6× forward P/E, NVIDIA trades 21.6% below the semiconductor
+            sector median of 28.9× — despite having the highest revenue growth
+            (+65%), the highest EBITDA margin (62%), and a PEG ratio of 0.62
+            that signals the stock is not expensive relative to its growth rate.
+          </p>
+        </div>
+        <div class="tk-card tk-nvda">
+          <div class="tk-co">NVDA</div>
+          <div class="tk-heading">
+            Four valuation methods average to near current price
+          </div>
+          <p>
+            Averaging the Fwd P/E, EV/Revenue, EV/EBITDA, and PEG-implied price
+            targets using peer medians produces a base implied price of
+            <strong>~$115.57</strong> — nearly identical to the current ~$115.
+            The EV/EBITDA method overshoots dramatically ($245 base); the
+            average of all four is the more reliable signal.
+          </p>
+        </div>
+        <div class="tk-card tk-t1">
+          <div class="tk-co">T1 ENERGY</div>
+          <div class="tk-heading">
+            A $2 stock with a credible path to $18 — if G2 executes
+          </div>
+          <p>
+            The bull case is a single bet: does G2_Austin Phase 1 come online on
+            schedule and with the $300M financing in place? If yes, the long-run
+            EBITDA model implies <strong>~9× upside</strong> from current price.
+            If the financing falls through and forces share dilution, most of
+            that upside disappears.
+          </p>
+        </div>
+        <div class="tk-card tk-t1">
+          <div class="tk-co">T1 ENERGY</div>
+          <div class="tk-heading">
+            FEOC compliance moved the probability math, not the value
+          </div>
+          <p>
+            The December 2025 restructuring eliminated the binary risk that 45X
+            credits could be denied. This shifted probability weight from the
+            distressed scenario (20% → 9%) to the bull scenario (15% → 25%),
+            raising the weighted average fair value by <strong>$1.95</strong> —
+            not by creating new earnings, but by reducing the chance of total
+            loss.
+          </p>
+        </div>
+        <div class="tk-card tk-both">
+          <div class="tk-co">Cross-Model Insight</div>
+          <div class="tk-heading">
+            One analytical framework, two completely different risk profiles
+          </div>
+          <p>
+            NVDA is a <strong>large-cap incumbent</strong> — profitable, growing
+            fast, and trading at a discount to peers with minimal execution
+            risk. T1 is a <strong>micro-cap turnaround</strong> —
+            pre-profitability, policy-dependent, and binary around a
+            construction and financing timeline. Applying the same peer comp and
+            DCF methodology to both companies demonstrates how the analytical
+            infrastructure adapts to any corporation regardless of size, sector,
+            or stage of development — which is exactly what this project is
+            designed to do.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <span
+        >A project by Angel Guerrero - Society for AI in Enterprise Systems ·
+        Est. CSULA 2026</span
+      >
+      <span>Data: Q3 2025 10-Q Filings · Analyst Consensus · March 2026</span>
+      <span>Not investment advice — Educational research only</span>
+    </footer>
+
+    <script>
+      Chart.defaults.color = "#5d7d98";
+      Chart.defaults.borderColor = "#172d47";
+      Chart.defaults.font.family = "'JetBrains Mono', monospace";
+      Chart.defaults.font.size = 11;
+
+      const C = {
+        gold: "#c9a766",
+        goldA: "#c9a76699",
+        green: "#4db87f",
+        greenA: "#4db87f99",
+        red: "#df5f5f",
+        redA: "#df5f5f99",
+        sil: "#8faabb",
+        silA: "#8faabb88",
+        yel: "#e0be48",
+        yelA: "#e0be4888",
+        muted: "#2e4862",
+      };
+
+      /* TABS */
+      function go(id, btn) {
+        document.querySelectorAll(".tab-btn").forEach((b) => {
+          b.classList.remove("on");
+          b.setAttribute("aria-selected", "false");
+        });
+        document
+          .querySelectorAll(".tab-panel")
+          .forEach((p) => p.classList.remove("on"));
+        btn.classList.add("on");
+        btn.setAttribute("aria-selected", "true");
+        document.getElementById("tab-" + id).classList.add("on");
+        if (id === "nvda" && !ci.nvda) {
+          initNVDA();
+          ci.nvda = true;
+        }
+        if (id === "t1c" && !ci.t1c) {
+          initT1C();
+          ci.t1c = true;
+        }
+        if (id === "t1v" && !ci.t1v) {
+          initT1V();
+          ci.t1v = true;
+        }
+      }
+      const ci = { nvda: false, t1c: false, t1v: false };
+
+      /* NVDA CHARTS */
+      function initNVDA() {
+        new Chart(document.getElementById("cNvdaPT"), {
+          type: "bar",
+          data: {
+            labels: ["Fwd P/E", "EV/EBITDA", "EV/Revenue", "Average"],
+            datasets: [
+              {
+                label: "Bear (−20%)",
+                data: [88.5, 196.0, 83.3, 92.3],
+                backgroundColor: C.redA,
+                borderColor: C.red,
+                borderWidth: 1,
+              },
+              {
+                label: "Base",
+                data: [110.6, 245.4, 104.5, 115.6],
+                backgroundColor: C.goldA,
+                borderColor: C.gold,
+                borderWidth: 1,
+              },
+              {
+                label: "Bull (+20%)",
+                data: [132.7, 294.8, 125.8, 138.9],
+                backgroundColor: C.greenA,
+                borderColor: C.green,
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { boxWidth: 10, padding: 14 },
+              },
+            },
+            scales: {
+              y: {
+                ticks: { callback: (v) => "$" + v },
+                grid: { color: "#172d47" },
+              },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+        new Chart(document.getElementById("cNvdaM"), {
+          type: "bar",
+          data: {
+            labels: ["Gross Margin", "EBITDA Margin", "Net Margin"],
+            datasets: [
+              {
+                label: "NVDA",
+                data: [74.8, 62, 55.6],
+                backgroundColor: C.goldA,
+                borderColor: C.gold,
+                borderWidth: 1,
+              },
+              {
+                label: "AVGO",
+                data: [77, 58, 11],
+                backgroundColor: C.silA,
+                borderColor: C.sil,
+                borderWidth: 1,
+              },
+              {
+                label: "AMD",
+                data: [57, 25, 6],
+                backgroundColor: C.greenA,
+                borderColor: C.green,
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { boxWidth: 10, padding: 14 },
+              },
+            },
+            scales: {
+              y: {
+                max: 90,
+                ticks: { callback: (v) => v + "%" },
+                grid: { color: "#172d47" },
+              },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+      }
+
+      /* T1 COMP CHARTS */
+      function initT1C() {
+        new Chart(document.getElementById("cT1PT"), {
+          type: "bar",
+          data: {
+            labels: [
+              "EV/EBITDA (FY25)",
+              "EV/EBITDA (Long-Run)",
+              "EV/Revenue (NTM)",
+              "Price/Book",
+            ],
+            datasets: [
+              {
+                label: "Bear",
+                data: [-1.7, 13.8, 13.5, 0.96],
+                backgroundColor: C.redA,
+                borderColor: C.red,
+                borderWidth: 1,
+              },
+              {
+                label: "Base",
+                data: [-1.3, 18.0, 17.6, 1.2],
+                backgroundColor: C.goldA,
+                borderColor: C.gold,
+                borderWidth: 1,
+              },
+              {
+                label: "Bull",
+                data: [0.1, 33.5, 25.2, 2.0],
+                backgroundColor: C.greenA,
+                borderColor: C.green,
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { boxWidth: 10, padding: 14 },
+              },
+            },
+            scales: {
+              y: {
+                ticks: { callback: (v) => "$" + v.toFixed(1) },
+                grid: { color: "#172d47" },
+              },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+        new Chart(document.getElementById("cT1M"), {
+          type: "bar",
+          data: {
+            labels: ["T1 Energy", "FSLR", "CSIQ", "JKS", "DQ"],
+            datasets: [
+              {
+                label: "Gross Margin (%)",
+                data: [10, 40.8, 17.2, 7.3, 15],
+                backgroundColor: [C.goldA, C.greenA, C.silA, C.redA, C.yelA],
+                borderColor: [C.gold, C.green, C.sil, C.red, C.yel],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: {
+                max: 50,
+                ticks: { callback: (v) => v + "%" },
+                grid: { color: "#172d47" },
+              },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+      }
+
+      /* T1 VALUATION CHARTS + INTERACTIVE DCF */
+      const NET_DEBT = 547;
+      const SHARES = 168.626;
+      const EBITDA = { bear: 200, base: 375, bull: 450 };
+      let dcfChart = null;
+
+      function calcPV(ebitda, wacc, mult, years) {
+        const equity = ebitda * mult - NET_DEBT;
+        const perShr = equity / SHARES;
+        return Math.max(0, perShr / Math.pow(1 + wacc / 100, years)).toFixed(2);
+      }
+
+      function updateDCF() {
+        const wacc = parseFloat(document.getElementById("sliderWacc").value);
+        const mult = parseFloat(document.getElementById("sliderMult").value);
+        const years = parseInt(document.getElementById("sliderYears").value);
+
+        document.getElementById("valWacc").textContent = wacc + "%";
+        document.getElementById("valMult").textContent = mult + "×";
+        document.getElementById("valYears").textContent = years;
+
+        const bear = calcPV(EBITDA.bear, wacc, mult, years);
+        const base = calcPV(EBITDA.base, wacc, mult, years);
+        const bull = calcPV(EBITDA.bull, wacc, mult, years);
+
+        document.getElementById("priceBear").textContent = "$" + bear;
+        document.getElementById("priceBase").textContent = "$" + base;
+        document.getElementById("priceBull").textContent = "$" + bull;
+
+        document.getElementById("detailBear").innerHTML =
+          `Run-rate EBITDA: $${EBITDA.bear}M<br>Forward EV: $${(EBITDA.bear * mult).toFixed(0)}M<br>Post-FEOC Probability: <strong>28%</strong>`;
+        document.getElementById("detailBase").innerHTML =
+          `Run-rate EBITDA: $${EBITDA.base}M<br>Forward EV: $${(EBITDA.base * mult).toFixed(0)}M<br>Post-FEOC Probability: <strong>38%</strong>`;
+        document.getElementById("detailBull").innerHTML =
+          `Run-rate EBITDA: $${EBITDA.bull}M<br>Forward EV: $${(EBITDA.bull * mult).toFixed(0)}M<br>Post-FEOC Probability: <strong>25%</strong>`;
+
+        if (dcfChart) {
+          dcfChart.data.datasets[0].data = [
+            2.08,
+            0.5,
+            parseFloat(bear),
+            7.54,
+            9.49,
+            parseFloat(base),
+            parseFloat(bull),
+          ];
+          dcfChart.data.labels = [
+            "Current\n$2.08",
+            "Distressed\n$0.50",
+            `Bear\n$${bear}`,
+            "PW Pre-FEOC\n$7.54",
+            "PW Post-FEOC\n$9.49",
+            `Base\n$${base}`,
+            `Bull\n$${bull}`,
+          ];
+          dcfChart.update();
+        }
+      }
+
+      function resetDCF() {
+        document.getElementById("sliderWacc").value = 18;
+        document.getElementById("sliderMult").value = 10;
+        document.getElementById("sliderYears").value = 3;
+        updateDCF();
+      }
+
+      function initT1V() {
+        dcfChart = new Chart(document.getElementById("cDcf"), {
+          type: "bar",
+          data: {
+            labels: [
+              "Current\n$2.08",
+              "Distressed\n$0.50",
+              "Bear\n$5.24",
+              "PW Pre-FEOC\n$7.54",
+              "PW Post-FEOC\n$9.49",
+              "Base\n$11.57",
+              "Bull\n$14.27",
+            ],
+            datasets: [
+              {
+                label: "$/share",
+                data: [2.08, 0.5, 5.24, 7.54, 9.49, 11.57, 14.27],
+                backgroundColor: [
+                  C.muted,
+                  C.redA,
+                  C.redA + "cc",
+                  C.goldA,
+                  C.goldA + "cc",
+                  C.greenA,
+                  C.greenA + "cc",
+                ],
+                borderColor: [
+                  C.sil,
+                  C.red,
+                  C.red,
+                  C.gold,
+                  C.gold,
+                  C.green,
+                  C.green,
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: {
+                ticks: { callback: (v) => "$" + v },
+                grid: { color: "#172d47" },
+              },
+              x: {
+                grid: { display: false },
+                ticks: { maxRotation: 0, font: { size: 9 } },
+              },
+            },
+          },
+        });
+        new Chart(document.getElementById("cProb"), {
+          type: "doughnut",
+          data: {
+            labels: [
+              "Bull — Full Execution (25%)",
+              "Base — G2 Online (38%)",
+              "Bear — Delays (28%)",
+              "Distressed (9%)",
+            ],
+            datasets: [
+              {
+                data: [25, 38, 28, 9],
+                backgroundColor: [
+                  C.greenA + "cc",
+                  C.goldA + "cc",
+                  C.redA + "99",
+                  C.muted,
+                ],
+                borderColor: [C.green, C.gold, C.red, C.sil],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            cutout: "60%",
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { boxWidth: 10, padding: 12, font: { size: 10 } },
+              },
+            },
+          },
+        });
+      }
+
+      initNVDA();
+      ci.nvda = true;
+    </script>
+  </body>
+</html>
