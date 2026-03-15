@@ -1166,23 +1166,6 @@ erDiagram
       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) generate();
     });
 
-    // Rate limiter — max 5 generations per hour per browser
-    const RATE_LIMIT = 5;
-    const RATE_WINDOW = 60 * 60 * 1000; // 1 hour in ms
-    function checkRateLimit() {
-      const now = Date.now();
-      let log = JSON.parse(localStorage.getItem('saies_rate') || '[]');
-      // Remove entries older than 1 hour
-      log = log.filter(t => now - t < RATE_WINDOW);
-      if (log.length >= RATE_LIMIT) {
-        const oldest = log[0];
-        const resetIn = Math.ceil((RATE_WINDOW - (now - oldest)) / 60000);
-        return { allowed: false, resetIn };
-      }
-      log.push(now);
-      localStorage.setItem('saies_rate', JSON.stringify(log));
-      return { allowed: true };
-    }
   </script>
 
 </body>
