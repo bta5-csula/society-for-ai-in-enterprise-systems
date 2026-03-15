@@ -21,14 +21,13 @@ exports.handler = async function(event) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: body.prompt }] }],
-        generationConfig: { maxOutputTokens: 1500, temperature: 0.2 }
+        generationConfig: { maxOutputTokens: 8192, temperature: 0.2 }
       })
     });
 
     const data = await response.json();
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    // Log what we got so it appears in Netlify function logs
     console.log('HTTP status:', response.status);
     console.log('Text length:', text.length);
     console.log('Text preview:', text.slice(0, 200));
