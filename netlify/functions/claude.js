@@ -26,12 +26,15 @@ exports.handler = async function(event) {
     });
 
     const data = await response.json();
-
-    if (!data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-      console.error('Unexpected Gemini response:', JSON.stringify(data));
-    }
-
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Log what we got so it appears in Netlify function logs
+    console.log('HTTP status:', response.status);
+    console.log('Text length:', text.length);
+    console.log('Text preview:', text.slice(0, 200));
+    if (!text) {
+      console.error('Empty text. Full response:', JSON.stringify(data).slice(0, 500));
+    }
 
     return {
       statusCode: 200,
@@ -42,7 +45,7 @@ exports.handler = async function(event) {
     console.error('Function error:', err.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Proxy error', detail: err.message })
+      body: JSON.stringify({ error: err.message })
     };
   }
 };

@@ -925,8 +925,8 @@ erDiagram
         finishProgress(false);
         status.style.display = 'block';
         status.className = 'status error';
-        status.textContent = '// Error — try rephrasing your description.';
-        console.error(err);
+        status.textContent = '// Error: ' + err.message;
+        console.error('Full error:', err);
       } finally {
         btn.disabled = false;
         btn.textContent = 'Generate diagram';
