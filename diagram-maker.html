@@ -10,6 +10,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="favicon_io/favicon-16x16.png">
   <link rel="manifest" href="favicon_io/site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -73,29 +74,30 @@
       font-size: 16px;
       letter-spacing: 0.1em;
       color: var(--gold);
+      text-transform: uppercase;
       text-decoration: none;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .nav-back {
+    .nav-back-btn {
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: 10px 24px;
+      font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: var(--text-dim);
+      cursor: pointer;
       text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: color 0.2s;
+      transition: border-color 0.2s, color 0.2s;
     }
 
-    .nav-back:hover { color: var(--gold); }
-
-    .nav-back::before {
-      content: '←';
-      font-size: 14px;
+    .nav-back-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
     }
 
     /* MAIN */
@@ -373,7 +375,7 @@
       <img src="img/saies_logo_icon.png" alt="SAIES Logo" style="height:42px;width:42px;object-fit:contain;" />
       SAIES
     </a>
-    <a href="index.html#projects" class="nav-back">Back to projects</a>
+    <a href="index.html#projects" class="nav-back-btn">← Back to Projects</a>
   </nav>
 
   <main>
@@ -388,10 +390,13 @@
 
       <div class="type-label">// Diagram type</div>
       <div class="type-buttons">
-        <button class="type-btn active" onclick="setType('usecase', this)">Use-case</button>
-        <button class="type-btn" onclick="setType('activity', this)">Activity</button>
-        <button class="type-btn" onclick="setType('class', this)">Class</button>
-        <button class="type-btn" onclick="setType('er', this)">Entity-relationship</button>
+        <button class="type-btn active" onclick="setType('usecase', this)" onmouseenter="showDesc('usecase')" onmouseleave="showDesc(selectedType)">Use-case</button>
+        <button class="type-btn" onclick="setType('activity', this)" onmouseenter="showDesc('activity')" onmouseleave="showDesc(selectedType)">Activity</button>
+        <button class="type-btn" onclick="setType('class', this)" onmouseenter="showDesc('class')" onmouseleave="showDesc(selectedType)">Class</button>
+        <button class="type-btn" onclick="setType('er', this)" onmouseenter="showDesc('er')" onmouseleave="showDesc(selectedType)">Entity-relationship</button>
+      </div>
+      <div id="typeDesc" style="font-size:11px;color:var(--text-dim);letter-spacing:0.05em;line-height:1.7;min-height:32px;margin-bottom:24px;transition:opacity 0.2s;">
+        Shows actors (people or systems) and the actions they perform within a system. Best for mapping out who does what.
       </div>
 
       <div class="input-label">// Describe your system</div>
@@ -432,12 +437,12 @@
   </main>
 
   <footer>
-    A project by <a href="index.html">Brian Ta - SAIES</a> · Cal State LA
+    A project by <a href="index.html">SAIES — Society for AI in Enterprise Systems</a> · Cal State LA
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
   <script>
     let selectedType = 'usecase';
     let currentCode = '';
@@ -445,10 +450,42 @@
 
     mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
 
+    const typeDescriptions = {
+      usecase:  'Shows actors (people or systems) and the actions they perform within a system. Best for mapping out who does what.',
+      activity: 'Illustrates the step-by-step flow of a process, including decisions and parallel paths. Best for modeling workflows.',
+      class:    'Defines the structure of a system — its objects, attributes, methods, and relationships. Best for object-oriented design.',
+      er:       'Maps database entities, their attributes, and the relationships between them. Best for designing data models.'
+    };
+
+    let descTimeout = null;
+    let currentDesc = 'usecase';
+
+    function showDesc(type, instant) {
+      if (type === currentDesc) return;
+      currentDesc = type;
+      const el = document.getElementById('typeDesc');
+      clearTimeout(descTimeout);
+      if (instant) {
+        el.textContent = typeDescriptions[type] || '';
+        el.style.opacity = '1';
+        return;
+      }
+      el.style.transition = 'opacity 0.25s ease';
+      el.style.opacity = '0';
+      descTimeout = setTimeout(() => {
+        el.textContent = typeDescriptions[type] || '';
+        el.style.opacity = '1';
+      }, 200);
+    }
+
     function setType(type, btn) {
       selectedType = type;
+      currentDesc = type;
       document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      const el = document.getElementById('typeDesc');
+      el.textContent = typeDescriptions[type] || '';
+      el.style.opacity = '1';
     }
 
     const typeInstructions = {
