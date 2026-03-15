@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Systems Analysis Diagram Maker — generate use-case, activity, class, and entity-relationship diagrams from plain text descriptions." />
+  <title>Systems Analysis Diagram Maker — SAIES</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon_io/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon_io/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon_io/favicon-16x16.png">
+  <link rel="manifest" href="favicon_io/site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080b10;
+      --bg2: #0d1117;
+      --bg3: #111820;
+      --gold: #c8a96e;
+      --gold2: #e8c98a;
+      --gold-dim: rgba(200,169,110,0.15);
+      --teal: #4dd9c0;
+      --teal-dim: rgba(77,217,192,0.1);
+      --text: #e8e2d6;
+      --text-dim: #b8b2a8;
+      --border: rgba(200,169,110,0.18);
+      --border2: rgba(255,255,255,0.06);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(200,169,110,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,169,110,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      background: rgba(8,11,16,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border2);
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-back {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s;
+    }
+
+    .nav-back:hover { color: var(--gold); }
+
+    .nav-back::before {
+      content: '←';
+      font-size: 14px;
+    }
+
+    /* MAIN */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 148px 48px 100px;
+    }
+
+    .page-tag {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(36px, 5vw, 64px);
+      line-height: 1.05;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    h1 em { font-style: italic; color: var(--gold); }
+
+    .divider {
+      width: 48px;
+      height: 1px;
+      background: var(--gold);
+      margin-bottom: 32px;
+    }
+
+    .page-sub {
+      color: var(--text-dim);
+      font-size: 13px;
+      line-height: 1.8;
+      max-width: 600px;
+      margin-bottom: 48px;
+    }
+
+    /* TOOL CARD */
+    .tool-card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 40px;
+    }
+
+    /* TYPE SELECTOR */
+    .type-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .type-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+
+    .type-btn {
+      padding: 8px 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 2px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .type-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .type-btn.active {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+      color: var(--gold);
+    }
+
+    /* INPUT */
+    .input-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 130px;
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      background: var(--bg3);
+      color: var(--text);
+      border: 1px solid var(--border2);
+      border-radius: 2px;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    textarea::placeholder { color: var(--text-dim); opacity: 0.6; }
+
+    .input-hint {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 8px;
+      opacity: 0.7;
+    }
+
+    /* GENERATE BUTTON */
+    .generate-btn {
+      margin-top: 24px;
+      padding: 12px 32px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .generate-btn:hover { background: var(--gold2); }
+    .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* STATUS */
+    .status {
+      margin-top: 16px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--teal);
+      display: none;
+    }
+
+    .status.error { color: #e07070; }
+
+    /* DIAGRAM OUTPUT */
+    .diagram-output {
+      margin-top: 40px;
+      display: none;
+    }
+
+    .output-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .diagram-frame {
+      background: #ffffff;
+      border-radius: 2px;
+      padding: 32px;
+      overflow-x: auto;
+    }
+
+    .diagram-frame svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* CODE BLOCK */
+    .code-toggle {
+      margin-top: 16px;
+      font-size: 11px;
+      color: var(--text-dim);
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      background: none;
+      border: none;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .code-toggle:hover { color: var(--gold); }
+
+    .code-block {
+      display: none;
+      margin-top: 12px;
+      padding: 16px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 2px;
+      font-size: 11px;
+      line-height: 1.7;
+      color: var(--text-dim);
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    /* COPY BUTTON */
+    .copy-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--text-dim);
+      padding: 4px 10px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 32px 48px;
+      border-top: 1px solid var(--border2);
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+
+    @media (max-width: 700px) {
+      nav { padding: 16px 24px; }
+      main { padding: 120px 24px 80px; }
+      .tool-card { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <img src="img/saies_logo_icon.png" alt="SAIES Logo" style="height:42px;width:42px;object-fit:contain;" />
+      SAIES
+    </a>
+    <a href="index.html#projects" class="nav-back">Back to projects</a>
+  </nav>
+
+  <main>
+    <div class="page-tag">// Projects — Systems Analysis</div>
+    <h1>Systems Analysis<br><em>Diagram Maker</em></h1>
+    <div class="divider"></div>
+    <p class="page-sub">
+      Describe any system in plain English and instantly generate a professional diagram. Supports use-case, activity, class, and entity-relationship diagrams — powered by AI.
+    </p>
+
+    <div class="tool-card">
+
+      <div class="type-label">// Diagram type</div>
+      <div class="type-buttons">
+        <button class="type-btn active" onclick="setType('usecase', this)">Use-case</button>
+        <button class="type-btn" onclick="setType('activity', this)">Activity</button>
+        <button class="type-btn" onclick="setType('class', this)">Class</button>
+        <button class="type-btn" onclick="setType('er', this)">Entity-relationship</button>
+      </div>
+
+      <div class="input-label">// Describe your system</div>
+      <textarea id="userInput" placeholder="e.g. An online store where customers can browse products, add them to a cart, and checkout. Admins can manage inventory and view orders."></textarea>
+      <div class="input-hint">Press Cmd/Ctrl + Enter to generate</div>
+
+      <button class="generate-btn" id="genBtn" onclick="generate()">Generate diagram</button>
+
+      <div id="progressWrap" style="display:none;margin-top:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span id="progressLabel" style="font-size:11px;letter-spacing:0.1em;color:var(--teal);">// Initializing...</span>
+          <span id="progressPct" style="font-size:11px;color:var(--text-dim);">0%</span>
+        </div>
+        <div style="height:2px;background:var(--border2);border-radius:2px;overflow:hidden;">
+          <div id="progressBar" style="height:100%;width:0%;background:var(--gold);border-radius:2px;transition:width 0.4s ease;"></div>
+        </div>
+      </div>
+
+      <div class="status" id="status"></div>
+
+      <div class="diagram-output" id="diagramOutput">
+        <div class="output-label">
+          <span>// Output</span>
+          <div style="display:flex;gap:8px;">
+            <button class="copy-btn" id="downloadPdfBtn" onclick="downloadPDF()">Download PDF</button>
+            <button class="copy-btn" id="downloadBtn" onclick="downloadSVG()">Download SVG</button>
+            <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy code</button>
+          </div>
+        </div>
+        <div class="diagram-frame" id="diagramFrame">
+          <div id="diagram"></div>
+        </div>
+        <button class="code-toggle" onclick="toggleCode()" id="codeToggle">▶ Show diagram data</button>
+        <pre class="code-block" id="codeBlock"></pre>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    A project by <a href="index.html">SAIES — Society for AI in Enterprise Systems</a> · Cal State LA
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    let selectedType = 'usecase';
+    let currentCode = '';
+    let codeVisible = false;
+
+    mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+
+    function setType(type, btn) {
+      selectedType = type;
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    const typeInstructions = {
+      usecase: `You are generating a UML use-case diagram. Return ONLY a valid JSON object — no explanation, no markdown fences, no backticks.
+
+JSON structure:
+{
+  "systemName": "Descriptive System Name",
+  "actors": [
+    {"id": "a1", "name": "Role Name", "side": "left", "type": "human"},
+    {"id": "a2", "name": "External System", "side": "bottom", "type": "system"}
+  ],
+  "usecases": [
+    {"id": "uc1", "name": "Verb-noun phrase"}
+  ],
+  "relationships": [
+    {"from": "a1", "to": "uc1", "type": "association"},
+    {"from": "uc1", "to": "uc2", "type": "include"},
+    {"from": "uc1", "to": "uc3", "type": "extend"},
+    {"from": "uc1", "to": "a2", "type": "include"}
+  ]
+}
+
+ACTOR RULES:
+- Human people/roles: type "human", side "left"
+- External systems invoked by the system (Turnitin, PayPal, etc.): type "system", side "bottom"
+
+PRIMARY USE CASE RULES:
+A primary use case is a standalone top-level goal that an actor directly initiates.
+Connect to actor with "association". Keep to 3-6 primary use cases across all actors.
+Ask: "Does the actor go to the system with THIS as their main goal?"
+- YES → primary, connect to actor with association
+- NO (it only happens as a sub-step inside another use case) → secondary, no association
+
+INCLUDE vs EXTEND RULES:
+INCLUDE = the sub-step ALWAYS happens, every single time, no exceptions
+  "from" = base use case, "to" = the always-required sub-step
+  Ask: "Can the base use case ever complete WITHOUT the sub-step?" If NO → include
+
+EXTEND = the sub-step ONLY happens SOMETIMES, under certain conditions
+  "from" = base use case, "to" = the optional sub-step
+  Ask: "Can the base use case complete WITHOUT the sub-step?" If YES → extend
+
+CRITICAL DISTINCTIONS — apply these exact rules:
+- Accessibility/accommodations: ALWAYS required by the system → use INCLUDE (not extend)
+- Adding members to a team: ALWAYS part of managing membership → use INCLUDE
+- Removing members from a team: OPTIONAL (only when needed) → use EXTEND
+- Providing feedback after grading: OPTIONAL (not always done) → use EXTEND
+- Plagiarism check on submission: ALWAYS happens on every submission → use INCLUDE
+- Peer review: triggered after grading begins AND after submission. Connect BOTH "Evaluate submissions" →include→ "Complete peer review" AND "Submit capstone work" →include→ "Complete peer review". Do NOT connect Student directly to peer review via association.
+
+CORRECT WORKED EXAMPLE (Capstone system):
+{
+  "systemName": "Canvas Capstone Assignments",
+  "actors": [
+    {"id": "a1", "name": "Instructors", "side": "left", "type": "human"},
+    {"id": "a2", "name": "Student", "side": "left", "type": "human"},
+    {"id": "a3", "name": "Turnitin", "side": "bottom", "type": "system"}
+  ],
+  "usecases": [
+    {"id": "uc1", "name": "Define capstone project specifications"},
+    {"id": "uc2", "name": "Assign project to capstone teams"},
+    {"id": "uc3", "name": "Manage team membership"},
+    {"id": "uc4", "name": "Evaluate submissions using grading rubrics"},
+    {"id": "uc5", "name": "Submit capstone projects as group submissions"},
+    {"id": "uc6", "name": "Structure project into multiple modules"},
+    {"id": "uc7", "name": "Support accessibility and disability accommodations"},
+    {"id": "uc8", "name": "Attach resources to project or individual modules"},
+    {"id": "uc9", "name": "Add students"},
+    {"id": "uc10", "name": "Remove students"},
+    {"id": "uc11", "name": "Provide feedback"},
+    {"id": "uc12", "name": "Complete anonymous peer review of teammates"},
+    {"id": "uc13", "name": "Perform plagiarism check on submissions"}
+  ],
+  "relationships": [
+    {"from": "a1", "to": "uc1", "type": "association"},
+    {"from": "a1", "to": "uc2", "type": "association"},
+    {"from": "a1", "to": "uc3", "type": "association"},
+    {"from": "a1", "to": "uc4", "type": "association"},
+    {"from": "a2", "to": "uc5", "type": "association"},
+    {"from": "uc1", "to": "uc6", "type": "extend"},
+    {"from": "uc1", "to": "uc7", "type": "include"},
+    {"from": "uc1", "to": "uc8", "type": "extend"},
+    {"from": "uc3", "to": "uc9", "type": "include"},
+    {"from": "uc3", "to": "uc10", "type": "extend"},
+    {"from": "uc4", "to": "uc11", "type": "extend"},
+    {"from": "uc4", "to": "uc12", "type": "include"},
+    {"from": "uc5", "to": "uc13", "type": "include"},
+    {"from": "uc5", "to": "uc12", "type": "include"},
+    {"from": "uc13", "to": "a3", "type": "include"}
+  ]
+}
+
+USE CASE ORDERING: List primary use cases FIRST, then secondary.
+USE CASE NAMES: Verb-noun phrases, up to 8 words, sentence case.
+
+Return ONLY the raw JSON object.`,
+
+      activity: `Generate a Mermaid flowchart activity diagram.
+Use rounded boxes for start/end, rectangles for actions, diamonds for decisions.
+Example format:
+flowchart TD
+  Start([Start]) --> Action[Do something]
+  Action --> Decision{Condition?}
+  Decision -->|Yes| Next[Next step]
+  Decision -->|No| Other[Other step]
+  Next --> End([End])`,
+
+      class: `Generate a Mermaid class diagram showing classes, attributes, methods, and relationships.
+Example format:
+classDiagram
+  class ClassName {
+    +attributeName: type
+    +methodName(): returnType
+  }
+  ClassA --|> ClassB : inherits`,
+
+      er: `Generate a Mermaid entity-relationship diagram showing entities, attributes, and relationships.
+Example format:
+erDiagram
+  ENTITY1 {
+    int id PK
+    string name
+  }
+  ENTITY2 {
+    int id PK
+    int entity1_id FK
+  }
+  ENTITY1 ||--o{ ENTITY2 : "has"`
+    };
+
+    function escXml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function wrapText(text, maxChars) {
+      const words = text.split(' ');
+      const lines = [];
+      let line = '';
+      words.forEach(w => {
+        const test = line ? line + ' ' + w : w;
+        if (test.length > maxChars && line) { lines.push(line); line = w; }
+        else line = test;
+      });
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    function renderUseCaseSVG(data) {
+      const { systemName, actors, usecases, relationships } = data;
+
+      const leftActors   = actors.filter(a => a.side === 'left');
+      const rightActors  = actors.filter(a => a.side === 'right');
+      const bottomActors = actors.filter(a => a.side === 'bottom');
+      const actorIds     = new Set(actors.map(a => a.id));
+
+      const primaryUCIds = new Set(
+        relationships.filter(r => r.type === 'association' && actorIds.has(r.from)).map(r => r.to)
+      );
+      const primaryUCs   = usecases.filter(uc => primaryUCIds.has(uc.id));
+      const secondaryUCs = usecases.filter(uc => !primaryUCIds.has(uc.id));
+
+      // --- Layout constants ---
+      const ucRx = 88, ucRy = 36;
+      const primaryGapY = 80;
+      const minSecSep   = 130;
+      const colGap      = 110;
+      const sysPadL = 36, sysPadR = 36, sysPadT = 74, sysPadB = 68;
+      const sysX = 148, sysY = 30;
+      const rowH = ucRy * 2 + primaryGapY;
+
+      // Primary UC positions
+      const ucPos = {};
+      primaryUCs.forEach((uc, i) => {
+        ucPos[uc.id] = { x: sysX + sysPadL + ucRx, y: sysY + sysPadT + i * rowH + ucRy };
+      });
+
+      // Secondary UC positions
+      const secX = sysX + sysPadL + ucRx * 2 + colGap + ucRx;
+      if (secondaryUCs.length > 0) {
+        const idealY = {};
+        secondaryUCs.forEach(uc => {
+          const ys = relationships
+            .filter(r => (r.from === uc.id || r.to === uc.id) && r.type !== 'association')
+            .map(r => { const oid = r.from===uc.id?r.to:r.from; return ucPos[oid]?.y; })
+            .filter(y => y != null);
+          idealY[uc.id] = ys.length ? ys.reduce((s,y)=>s+y,0)/ys.length : sysY+sysPadT+ucRy;
+        });
+        const sorted = [...secondaryUCs].sort((a,b) => idealY[a.id]-idealY[b.id]);
+        const placed = [];
+        sorted.forEach(uc => {
+          let y = idealY[uc.id];
+          for (const py of placed) { if (Math.abs(y-py) < minSecSep) y = py + minSecSep; }
+          placed.push(y);
+          ucPos[uc.id] = { x: secX, y };
+        });
+      }
+
+      // System height
+      const allUCYs = Object.values(ucPos).map(p => p.y);
+      const sysH = Math.max(
+        primaryUCs.length * rowH + sysPadT + sysPadB,
+        allUCYs.length ? (Math.max(...allUCYs) - sysY + ucRy + sysPadB) : 300
+      );
+      const hasTwoCol = secondaryUCs.length > 0;
+      const colCount  = hasTwoCol ? 2 : 1;
+      const sysW = colCount*(ucRx*2)+(colCount-1)*colGap+sysPadL+sysPadR;
+      const bottomActorH = bottomActors.length > 0 ? 148 : 0;
+      const totalW = sysX + sysW + (rightActors.length > 0 ? 148 : 40);
+      const totalH = sysY + sysH + bottomActorH + 55;
+
+      // The x position of the gap between columns — all labels go here
+      const primaryColX = sysX + sysPadL + ucRx;  // centre of primary column
+      const labelX = primaryColX + ucRx + colGap * 0.45;  // ~45% into the gap
+
+      // Actor positions
+      const actorPos = {};
+      leftActors.forEach(a => {
+        const ys = relationships.filter(r=>r.from===a.id&&r.type==='association')
+          .map(r=>ucPos[r.to]?.y).filter(y=>y!=null);
+        const avgY = ys.length?ys.reduce((s,y)=>s+y,0)/ys.length:sysY+sysH/2;
+        actorPos[a.id] = { x:65, y:avgY, type:a.type||'human' };
+      });
+      rightActors.forEach(a => {
+        const ys = relationships.filter(r=>r.from===a.id||r.to===a.id)
+          .map(r=>{const oid=r.from===a.id?r.to:r.from;return ucPos[oid]?.y;}).filter(y=>y!=null);
+        const avgY = ys.length?ys.reduce((s,y)=>s+y,0)/ys.length:sysY+sysH/2;
+        actorPos[a.id] = { x:sysX+sysW+75, y:avgY, type:a.type||'system' };
+      });
+      bottomActors.forEach(a => {
+        const xs = relationships.filter(r=>r.from===a.id||r.to===a.id)
+          .map(r=>{const oid=r.from===a.id?r.to:r.from;return ucPos[oid]?.x;}).filter(x=>x!=null);
+        const avgX = xs.length?xs.reduce((s,x)=>s+x,0)/xs.length:sysX+sysW/2;
+        actorPos[a.id] = { x:avgX, y:sysY+sysH+84, type:a.type||'system' };
+      });
+
+      const allPos = { ...ucPos, ...actorPos };
+
+      // Edge helpers
+      const outset = 5;
+      function ellipseEdge(cx,cy,tx,ty){const a=Math.atan2(ty-cy,tx-cx);return{x:cx+(ucRx+outset)*Math.cos(a),y:cy+(ucRy+outset)*Math.sin(a)};}
+      function rectEdge(cx,cy,tx,ty,hw,hh){const a=Math.atan2(ty-cy,tx-cx),c=Math.cos(a),s=Math.sin(a);const sc=Math.min(c!==0?(hw+outset)/Math.abs(c):Infinity,s!==0?(hh+outset)/Math.abs(s):Infinity);return{x:cx+c*sc,y:cy+s*sc};}
+      function stickEdge(ax,ay,tx,ty){const a=Math.atan2(ty-ay,tx-ax);return{x:ax+30*Math.cos(a),y:ay+44*Math.sin(a)};}
+      function getEdge(id,tx,ty){const pos=allPos[id];if(!pos)return null;if(ucPos[id])return ellipseEdge(pos.x,pos.y,tx,ty);if(pos.type==='system')return rectEdge(pos.x,pos.y,tx,ty,47,24);return stickEdge(pos.x,pos.y,tx,ty);}
+
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" style="background:white;font-family:Arial,sans-serif;">`;
+      svg += `<defs><marker id="htri" markerWidth="16" markerHeight="12" refX="15" refY="6" orient="auto"><polygon points="0 0,15 6,0 12" fill="white" stroke="#444" stroke-width="1.3"/></marker></defs>`;
+      svg += `<rect x="${sysX}" y="${sysY}" width="${sysW}" height="${sysH}" fill="white" stroke="#444" stroke-width="1.8"/>`;
+      svg += `<text x="${sysX+sysW/2}" y="${sysY+44}" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">${escXml(systemName)}</text>`;
+
+      const lineData  = [];
+      const labelData = [];
+
+      relationships.forEach(rel => {
+        const fp=allPos[rel.from], tp=allPos[rel.to]; if(!fp||!tp) return;
+        const isSys = (actorPos[rel.from]&&actorPos[rel.from].type==='system') ||
+                      (actorPos[rel.to]  &&actorPos[rel.to].type  ==='system');
+        const p1=getEdge(rel.from,tp.x,tp.y), p2=getEdge(rel.to,fp.x,fp.y); if(!p1||!p2) return;
+
+        if (rel.type==='association') {
+          lineData.push({type:'assoc',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
+        } else if (rel.type==='generalization') {
+          lineData.push({type:'gen',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
+        } else if (isSys) {
+          // System actor: solid plain line, no arrowhead, no label
+          lineData.push({type:'assoc',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
+        } else if (rel.type==='include') {
+          // Arrow: p1(base) → p2(included)
+          lineData.push({type:'include',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
+          // Label: find y where this line crosses labelX, place label there
+          const dx=p2.x-p1.x, dy=p2.y-p1.y;
+          if (Math.abs(dx) > 1) {
+            const t=(labelX-p1.x)/dx;
+            if (t>0.1 && t<0.9) {
+              const yAtLabel = p1.y + t*dy;
+              labelData.push({text:'<<include>>',x:labelX,y:yAtLabel-14,lineY:yAtLabel});
+            }
+          } else {
+            // Vertical line — put label to the left
+            const my=(p1.y+p2.y)/2;
+            labelData.push({text:'<<include>>',x:p1.x-55,y:my,lineY:my});
+          }
+        } else if (rel.type==='extend') {
+          // Arrow: p2(secondary) → p1(primary)
+          lineData.push({type:'extend',x1:p2.x,y1:p2.y,x2:p1.x,y2:p1.y});
+          const dx=p2.x-p1.x, dy=p2.y-p1.y;
+          if (Math.abs(dx) > 1) {
+            const t=(labelX-p1.x)/dx;
+            if (t>0.1 && t<0.9) {
+              const yAtLabel = p1.y + t*dy;
+              labelData.push({text:'<<extend>>',x:labelX,y:yAtLabel-14,lineY:yAtLabel});
+            }
+          } else {
+            const my=(p1.y+p2.y)/2;
+            labelData.push({text:'<<extend>>',x:p1.x-55,y:my,lineY:my});
+          }
+        }
+      });
+
+      // Sort labels by their line crossing y, then enforce minimum 18px vertical gap
+      labelData.sort((a,b)=>a.lineY-b.lineY);
+      for (let i=1; i<labelData.length; i++) {
+        const prev=labelData[i-1], cur=labelData[i];
+        const minGap=18;
+        if (cur.y - prev.y < minGap) cur.y = prev.y + minGap;
+      }
+
+      // Draw lines
+      lineData.forEach(l=>{
+        if(l.type==='assoc')    svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.5"/>`;
+        else if(l.type==='gen') svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.5" marker-end="url(#htri)"/>`;
+        else if(l.type==='include') svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
+        else if(l.type==='extend')  svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
+      });
+
+      // Draw labels
+      labelData.forEach(l=>{
+        svg+=`<text x="${l.x.toFixed(1)}" y="${l.y.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="#333" font-style="italic">${escXml(l.text)}</text>`;
+      });
+
+      // Draw use cases on top
+      usecases.forEach(uc=>{
+        const pos=ucPos[uc.id]; if(!pos) return;
+        svg+=`<ellipse cx="${pos.x}" cy="${pos.y}" rx="${ucRx}" ry="${ucRy}" fill="white" stroke="#555" stroke-width="1.7"/>`;
+        const lines=wrapText(uc.name,18),lh=16;
+        const startY=pos.y-(lines.length-1)*lh/2;
+        lines.forEach((l,i)=>{svg+=`<text x="${pos.x}" y="${(startY+i*lh).toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#111">${escXml(l)}</text>`;});
+      });
+
+      // Draw actors
+      function drawHuman(x,y,name){
+        const hR=14,headY=y-36,shdY=y-18,hipY=y+16,feetY=y+46;
+        svg+=`<circle cx="${x}" cy="${headY}" r="${hR}" fill="white" stroke="#444" stroke-width="1.6"/>`;
+        svg+=`<line x1="${x}" y1="${headY+hR}" x2="${x}" y2="${hipY}" stroke="#444" stroke-width="1.6"/>`;
+        svg+=`<line x1="${x-24}" y1="${shdY+7}" x2="${x+24}" y2="${shdY+7}" stroke="#444" stroke-width="1.6"/>`;
+        svg+=`<line x1="${x}" y1="${hipY}" x2="${x-20}" y2="${feetY}" stroke="#444" stroke-width="1.6"/>`;
+        svg+=`<line x1="${x}" y1="${hipY}" x2="${x+20}" y2="${feetY}" stroke="#444" stroke-width="1.6"/>`;
+        wrapText(name,12).forEach((l,i)=>{svg+=`<text x="${x}" y="${feetY+20+i*17}" text-anchor="middle" font-size="13" fill="#111">${escXml(l)}</text>`;});
+      }
+      function drawSystem(x,y,name){
+        const bw=92,bh=44;
+        svg+=`<rect x="${(x-bw/2).toFixed(1)}" y="${(y-bh/2).toFixed(1)}" width="${bw}" height="${bh}" fill="white" stroke="#444" stroke-width="1.6"/>`;
+        const lines=wrapText(name,13),lh=16,startY=y-(lines.length-1)*lh/2;
+        lines.forEach((l,i)=>{svg+=`<text x="${x}" y="${(startY+i*lh).toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="#111">${escXml(l)}</text>`;});
+      }
+      [...leftActors,...rightActors,...bottomActors].forEach(a=>{
+        const pos=actorPos[a.id]; if(!pos) return;
+        if(a.type==='human') drawHuman(pos.x,pos.y,a.name); else drawSystem(pos.x,pos.y,a.name);
+      });
+
+      svg += '</svg>';
+      return svg;
+    }
+
+    // Progress bar helpers
+    let progressTimer = null;
+    function startProgress() {
+      const wrap  = document.getElementById('progressWrap');
+      const bar   = document.getElementById('progressBar');
+      const label = document.getElementById('progressLabel');
+      const pct   = document.getElementById('progressPct');
+      wrap.style.display = 'block';
+      bar.style.width = '0%';
+      let progress = 0;
+      const stages = [
+        { target: 15, label: '// Sending request...',    duration: 600  },
+        { target: 35, label: '// AI is thinking...',     duration: 1200 },
+        { target: 80, label: '// Generating diagram...', duration: 7000 },
+      ];
+      let stageIdx = 0;
+      clearInterval(progressTimer);
+      function tick() {
+        const stage = stages[stageIdx];
+        if (!stage) return;
+        const step = (stage.target - progress) / (stage.duration / 80);
+        progress = Math.min(progress + step, stage.target);
+        bar.style.width = progress.toFixed(1) + '%';
+        pct.textContent = Math.round(progress) + '%';
+        label.textContent = stage.label;
+        if (Math.round(progress) >= stage.target) {
+          stageIdx++;
+          if (stageIdx >= stages.length) clearInterval(progressTimer);
+        }
+      }
+      progressTimer = setInterval(tick, 80);
+    }
+
+    function finishProgress(success) {
+      clearInterval(progressTimer);
+      const bar   = document.getElementById('progressBar');
+      const label = document.getElementById('progressLabel');
+      const pct   = document.getElementById('progressPct');
+      const wrap  = document.getElementById('progressWrap');
+      if (success) {
+        bar.style.width = '100%';
+        pct.textContent = '100%';
+        label.textContent = '// Done';
+        setTimeout(() => { wrap.style.display = 'none'; bar.style.width = '0%'; }, 900);
+      } else {
+        bar.style.background = '#e07070';
+        label.textContent = '// Error — try again';
+        pct.textContent = '';
+        setTimeout(() => {
+          wrap.style.display = 'none';
+          bar.style.background = 'var(--gold)';
+          bar.style.width = '0%';
+        }, 2500);
+      }
+    }
+
+    async function generate() {
+      const input = document.getElementById('userInput').value.trim();
+      if (!input) return;
+
+      // Check rate limit before doing anything
+      const rate = checkRateLimit();
+      if (!rate.allowed) {
+        const status = document.getElementById('status');
+        status.style.display = 'block';
+        status.className = 'status error';
+        status.textContent = `// Limit reached — you can generate ${RATE_LIMIT} diagrams per hour. Try again in ${rate.resetIn} minute${rate.resetIn !== 1 ? 's' : ''}.`;
+        return;
+      }
+
+      const btn    = document.getElementById('genBtn');
+      const status = document.getElementById('status');
+      const output = document.getElementById('diagramOutput');
+
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+      status.style.display = 'none';
+      output.style.display = 'none';
+      startProgress();
+
+      const isUseCase = selectedType === 'usecase';
+      const userPrompt = isUseCase
+        ? `${typeInstructions.usecase}\n\nUser description: ${input}`
+        : `${typeInstructions[selectedType]}\n\nUser description: ${input}\n\nReturn ONLY the raw Mermaid diagram code. No explanation, no markdown fences, no backticks. Start directly with the diagram type keyword.`;
+
+      try {
+        const res = await fetch('/.netlify/functions/claude', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: userPrompt })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Request failed');
+        let raw = (data.text || '').trim();
+
+        if (isUseCase) {
+          raw = raw.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim();
+          const diagram = JSON.parse(raw);
+          currentCode = JSON.stringify(diagram, null, 2);
+          document.getElementById('codeBlock').textContent = currentCode;
+          document.getElementById('diagram').innerHTML = renderUseCaseSVG(diagram);
+        } else {
+          let code = raw.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim();
+          currentCode = code;
+          document.getElementById('codeBlock').textContent = code;
+          const { svg } = await mermaid.render('mermaid-' + Date.now(), code);
+          document.getElementById('diagram').innerHTML = svg;
+        }
+
+        finishProgress(true);
+        output.style.display = 'block';
+        if (codeVisible) {
+          codeVisible = false;
+          document.getElementById('codeBlock').style.display = 'none';
+          document.getElementById('codeToggle').textContent = '▶ Show diagram data';
+        }
+
+      } catch (err) {
+        finishProgress(false);
+        status.style.display = 'block';
+        status.className = 'status error';
+        status.textContent = '// Error — try rephrasing your description.';
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate diagram';
+      }
+    }
+
+    function toggleCode() {
+      codeVisible = !codeVisible;
+      const block  = document.getElementById('codeBlock');
+      const toggle = document.getElementById('codeToggle');
+      block.style.display  = codeVisible ? 'block' : 'none';
+      toggle.textContent   = codeVisible ? '▼ Hide diagram data' : '▶ Show diagram data';
+    }
+
+    function downloadSVG() {
+      const svgEl = document.querySelector('#diagram svg');
+      if (!svgEl) return;
+      const serializer = new XMLSerializer();
+      const svgStr = serializer.serializeToString(svgEl);
+      const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      const typeName = { usecase: 'use-case', activity: 'activity', class: 'class', er: 'er' }[selectedType];
+      a.href = url;
+      a.download = `saies-${typeName}-diagram.svg`;
+      a.click();
+      URL.revokeObjectURL(url);
+      const btn = document.getElementById('downloadBtn');
+      btn.textContent = 'Downloaded!';
+      setTimeout(() => btn.textContent = 'Download SVG', 2000);
+    }
+
+    async function downloadPDF() {
+      const frame = document.getElementById('diagramFrame');
+      const btn   = document.getElementById('downloadPdfBtn');
+      btn.textContent = 'Preparing...';
+      btn.disabled = true;
+      try {
+        const canvas = await html2canvas(frame, { backgroundColor: '#ffffff', scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: canvas.width > canvas.height ? 'landscape' : 'portrait', unit: 'px', format: [canvas.width / 2, canvas.height / 2] });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
+        const typeName = { usecase: 'use-case', activity: 'activity', class: 'class', er: 'er' }[selectedType];
+        pdf.save(`saies-${typeName}-diagram.pdf`);
+        btn.textContent = 'Downloaded!';
+      } catch (err) {
+        btn.textContent = 'Error';
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        setTimeout(() => btn.textContent = 'Download PDF', 2000);
+      }
+    }
+
+    function copyCode() {
+      navigator.clipboard.writeText(currentCode).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy code', 2000);
+      });
+    }
+
+    document.getElementById('userInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) generate();
+    });
+
+    // Rate limiter — max 5 generations per hour per browser
+    const RATE_LIMIT = 5;
+    const RATE_WINDOW = 60 * 60 * 1000; // 1 hour in ms
+    function checkRateLimit() {
+      const now = Date.now();
+      let log = JSON.parse(localStorage.getItem('saies_rate') || '[]');
+      // Remove entries older than 1 hour
+      log = log.filter(t => now - t < RATE_WINDOW);
+      if (log.length >= RATE_LIMIT) {
+        const oldest = log[0];
+        const resetIn = Math.ceil((RATE_WINDOW - (now - oldest)) / 60000);
+        return { allowed: false, resetIn };
+      }
+      log.push(now);
+      localStorage.setItem('saies_rate', JSON.stringify(log));
+      return { allowed: true };
+    }
+  </script>
+
+</body>
+</html>
