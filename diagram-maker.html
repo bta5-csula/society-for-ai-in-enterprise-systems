@@ -1015,8 +1015,8 @@ erDiagram
       }
     }
 
-    // Rate limiter — max 5 generations per hour per browser
-    const RATE_LIMIT = 5;
+    // Rate limiter — max 10 generations per hour per browser
+    const RATE_LIMIT = 10;
     const RATE_WINDOW = 60 * 60 * 1000;
     function checkRateLimit() {
       const now = Date.now();
