@@ -13,7 +13,7 @@ exports.handler = async function(event) {
 
   try {
     const apiKey = process.env.GEMINI_API_KEY;
-    const model  = 'gemini-1.5-flash';
+    const model  = 'gemini-2.5-flash';
     const url    = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
@@ -27,7 +27,6 @@ exports.handler = async function(event) {
 
     const data = await response.json();
 
-    // Log for debugging
     if (!data?.candidates?.[0]?.content?.parts?.[0]?.text) {
       console.error('Unexpected Gemini response:', JSON.stringify(data));
     }
