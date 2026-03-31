@@ -1061,7 +1061,7 @@ erDiagram
         : `${typeInstructions[selectedType]}\n\nUser description: ${input}\n\nReturn ONLY the raw Mermaid diagram code. No explanation, no markdown fences, no backticks. Start directly with the diagram type keyword.`;
 
       try {
-        const res = await fetch('/api/claude', {
+        const res = await fetch('/api/gemini', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: userPrompt })
