@@ -991,8 +991,6 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
           "AI analyst is unfortunately unavailable for the rest of today.";
       }
 
-      setChatHistory((prev) => [...prev, { role: "ai", text: finalReply }]);
-
       // 3. UI Cleanup
       timerRefs.current.forEach(clearTimeout);
       setAiPct(100);
