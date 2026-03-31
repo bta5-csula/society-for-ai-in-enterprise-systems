@@ -964,6 +964,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
       // A more robust extraction that handles almost any API structure
       let finalReply = "No response.";
 
+      // 2.1. Extract the content
       if (typeof d === "string") {
         try {
           const parsed = JSON.parse(d);
@@ -972,19 +973,25 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
           finalReply = d;
         }
       } else if (d && typeof d === "object") {
-        // Check for common keys, or fallback to stringifying the whole object
         finalReply = d.text || d.reply || d.message || JSON.stringify(d);
       }
 
-      // Convert to string and trim FIRST to check for actual content
+      // 2.2. THE CRITICAL FIX:
+      // If finalReply is the literal string '{"text":""}', force it to be truly empty
+      if (finalReply === '{"text":""}' || finalReply === '{"reply":""}') {
+        finalReply = "";
+      }
+
+      // 2.3. Final cleanup
       finalReply = String(finalReply || "").trim();
 
-      // ══ QUOTA LIMIT CHECK ══
-      // If it's still empty after trimming, apply your custom message
-      if (!finalReply || finalReply === "{}") {
+      // 2.4. ══ QUOTA LIMIT CHECK ══
+      if (!finalReply || finalReply === "{}" || finalReply === "undefined") {
         finalReply =
           "AI analyst is unfortunately unavailable for the rest of today.";
       }
+
+      setChatHistory((prev) => [...prev, { role: "ai", text: finalReply }]);
 
       // 3. UI Cleanup
       timerRefs.current.forEach(clearTimeout);
