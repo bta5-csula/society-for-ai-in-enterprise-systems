@@ -933,7 +933,8 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
 
     try {
       // We call our internal Vercel route instead of an external API
-      const res = await fetch("/api/gemini", {
+      // Add the leading slash if it's missing and use window.location.origin to force it to the root.
+      const res = await fetch(window.location.origin + "/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
