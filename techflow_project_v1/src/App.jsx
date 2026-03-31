@@ -962,10 +962,9 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
 
       // 2. Extract the text safely. This checks 'text', then 'reply', then gives up.
       // A more robust extraction that handles almost any API structure
-      let finalReply = "No response content found.";
+      let finalReply = "No response.";
 
       if (typeof d === "string") {
-        // If the API sent a string instead of an object, try to parse it
         try {
           const parsed = JSON.parse(d);
           finalReply = parsed.text || parsed.reply || d;
@@ -973,11 +972,19 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
           finalReply = d;
         }
       } else if (d && typeof d === "object") {
-        // This is the standard path
+        // Check for common keys, or fallback to stringifying the whole object
         finalReply = d.text || d.reply || d.message || JSON.stringify(d);
       }
 
-      finalReply = finalReply.trim();
+      // Convert to string and trim FIRST to check for actual content
+      finalReply = String(finalReply || "").trim();
+
+      // ══ QUOTA LIMIT CHECK ══
+      // If it's still empty after trimming, apply your custom message
+      if (!finalReply || finalReply === "{}") {
+        finalReply =
+          "AI analyst is unfortunately unavailable for the rest of today.";
+      }
 
       // 3. UI Cleanup
       timerRefs.current.forEach(clearTimeout);
