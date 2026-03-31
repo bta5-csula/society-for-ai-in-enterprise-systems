@@ -961,7 +961,23 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
       console.log("Gemini Response Object:", d);
 
       // 2. Extract the text safely. This checks 'text', then 'reply', then gives up.
-      const finalReply = (d.text || d.reply || "No response.").trim();
+      // A more robust extraction that handles almost any API structure
+      let finalReply = "No response content found.";
+
+      if (typeof d === "string") {
+        // If the API sent a string instead of an object, try to parse it
+        try {
+          const parsed = JSON.parse(d);
+          finalReply = parsed.text || parsed.reply || d;
+        } catch {
+          finalReply = d;
+        }
+      } else if (d && typeof d === "object") {
+        // This is the standard path
+        finalReply = d.text || d.reply || d.message || JSON.stringify(d);
+      }
+
+      finalReply = finalReply.trim();
 
       // 3. UI Cleanup
       timerRefs.current.forEach(clearTimeout);
