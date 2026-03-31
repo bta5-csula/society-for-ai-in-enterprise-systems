@@ -988,7 +988,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
       // 2.4. ══ QUOTA LIMIT CHECK ══
       if (!finalReply || finalReply === "{}" || finalReply === "undefined") {
         finalReply =
-          "AI analyst is unfortunately unavailable for the rest of today.";
+          "AI Analyst is unfortunately unavailable for the rest of today.";
       }
 
       // 3. UI Cleanup
