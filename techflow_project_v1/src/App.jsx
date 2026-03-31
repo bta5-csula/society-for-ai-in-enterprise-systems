@@ -949,7 +949,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
       }
 
       const d = await res.json();
-      const reply = d.text || "No response."; // Access the 'reply' key we defined in the API route
+      const reply = d.text || d.reply || "No response."; // Access the 'reply' key we defined in the API route
 
       timerRefs.current.forEach(clearTimeout);
       setAiPct(100);
