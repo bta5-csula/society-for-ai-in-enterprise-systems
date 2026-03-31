@@ -917,13 +917,12 @@ export default function App() {
   const sendChat = async (overrideQ) => {
     const q = (overrideQ || chatInput).trim();
     if (!q || aiLoading) return;
+
+    // 1. Clear input and show user's message immediately
     setChatInput("");
     setChatHistory((h) => [...h, { role: "user", text: q }]);
-    setAiLoading(true);
-    setAiPct(5);
-    setAiStage("Receiving query…");
-    runStages();
 
+    // 2. Define the data context (The "Brain" of the analyst)
     const ctx = `TechFlow Industries FY 2019 — B2B Bike Manufacturer, $59.6M revenue, $26.5M profit (44.4% margin).
 Monthly peak: June $12.1M. 23 customers (US + Germany).
 Top customers: Bavaria Bikes $5.48M (ENTERPRISE, pays early), Beantown Bikes $4.07M, Capital Bikes $4.11M.
@@ -931,44 +930,62 @@ Payment: 27% early, 7% on-time, 66% late. Avg days late: 3.3. Worst: Furniture C
 Top products: Pro Touring Bike-Silver $7.57M, Road Bike Carbon Shimano $7.2M, Deluxe Touring Bike-Silver $7.39M.
 Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
 
+    // 3. Start the loading animations
+    setAiLoading(true);
+    setAiPct(5);
+    setAiStage("Analyzing data..."); // Changed from 'Receiving' to 'Analyzing' for better feel
+    runStages();
+
     try {
-      // We call our internal Vercel route instead of an external API
-      // Add the leading slash if it's missing and use window.location.origin to force it to the root.
+      // 1. Double-check that our data isn't empty before sending
+      console.log("Sending to Gemini:", { q, ctxLength: ctx.length });
+
       const res = await fetch(window.location.origin + "/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // We send the combined instructions and question as the 'prompt'
+          // The 'prompt' key must match what your /api/gemini.js expects
           prompt: `System: You are a sharp financial analyst for TechFlow Industries. 2019 data: 23 customers, 26 products, 5000 transactions. Answer in 3–5 punchy bullet points.\n\nContext: ${ctx}\n\nQuestion: ${q}`,
         }),
       });
 
-      // New check to prevent the 'catch' block from triggering on simple API errors
+      // 2. If the server is down or the path is wrong, this jumps to 'catch'
       if (!res.ok) {
-        throw new Error("Network response was not ok");
+        const errorData = await res.text(); // Try to read the error message from the server
+        throw new Error(`Server responded with ${res.status}: ${errorData}`);
       }
 
       const d = await res.json();
-      // DEBUG: This will show you the object in your browser console
-      console.log("Data received from API:", d);
-      const reply = d.text || d.reply || "No response."; // Access the 'reply' key we defined in the API route
 
+      // 1. Log the full object so you can see it in the console (F12)
+      console.log("Gemini Response Object:", d);
+
+      // 2. Extract the text safely. This checks 'text', then 'reply', then gives up.
+      const finalReply = (d.text || d.reply || "No response.").trim();
+
+      // 3. UI Cleanup
       timerRefs.current.forEach(clearTimeout);
       setAiPct(100);
       setAiStage("Done");
-      await new Promise((r) => setTimeout(r, 300));
-      setChatHistory((h) => [...h, { role: "ai", text: reply }]);
+
+      // 4. Wait for the progress bar animation to finish
+      await new Promise((r) => setTimeout(r, 400));
+
+      // 5. CRITICAL: Use the functional update to prevent state issues
+      setChatHistory((prev) => [...prev, { role: "ai", text: finalReply }]);
     } catch (err) {
-      console.error("Chat Error:", err); // Helps you debug in the browser console
+      console.error("Dashboard AI Error:", err);
       timerRefs.current.forEach(clearTimeout);
-      setChatHistory((h) => [
-        ...h,
-        { role: "ai", text: "⚠️ API error — check connection." },
+      setChatHistory((prev) => [
+        ...prev,
+        { role: "ai", text: "⚠️ API error — please check connection." },
       ]);
+    } finally {
+      // 6. Reset the loading states regardless of success or failure
+      setAiLoading(false);
+      setAiPct(0);
+      setAiStage("");
     }
-    setAiLoading(false);
-    setAiPct(0);
-    setAiStage("");
   };
 
   const totalRevenue = MONTHLY.reduce((s, m) => s + m.revenue, 0);
