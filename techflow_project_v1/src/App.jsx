@@ -932,27 +932,31 @@ Top products: Pro Touring Bike-Silver $7.57M, Road Bike Carbon Shimano $7.2M, De
 Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      // We call our internal Vercel route instead of an external API
+      const res = await fetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: `You are a sharp financial analyst for TechFlow Industries, a B2B bike manufacturer with $60M revenue. 2019 data: 23 customers, 26 products, 5000 transactions. Answer in 3–5 punchy bullet points with specific numbers. No filler.`,
-          messages: [
-            { role: "user", content: `Context:\n${ctx}\n\nQuestion: ${q}` },
-          ],
+          // We send the combined instructions and question as the 'prompt'
+          prompt: `System: You are a sharp financial analyst for TechFlow Industries. 2019 data: 23 customers, 26 products, 5000 transactions. Answer in 3–5 punchy bullet points.\n\nContext: ${ctx}\n\nQuestion: ${q}`,
         }),
       });
+
+      // New check to prevent the 'catch' block from triggering on simple API errors
+      if (!res.ok) {
+        throw new Error("Network response was not ok");
+      }
+
       const d = await res.json();
-      const reply =
-        d.content?.map((b) => b.text || "").join("") || "No response.";
+      const reply = d.reply || "No response."; // Access the 'reply' key we defined in the API route
+
       timerRefs.current.forEach(clearTimeout);
       setAiPct(100);
       setAiStage("Done");
       await new Promise((r) => setTimeout(r, 300));
       setChatHistory((h) => [...h, { role: "ai", text: reply }]);
-    } catch {
+    } catch (err) {
+      console.error("Chat Error:", err); // Helps you debug in the browser console
       timerRefs.current.forEach(clearTimeout);
       setChatHistory((h) => [
         ...h,
@@ -995,7 +999,11 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
         fontFamily: C.font,
         background: C.bg,
         minHeight: "100vh",
-        color: C.text,
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflowX: "auto",
+        overflowY: "auto",
       }}
     >
       <style>{`
@@ -1007,9 +1015,8 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
 
       {/* HEADER */}
       <div
+        className="glass-header"
         style={{
-          background: "linear-gradient(135deg,#0d1117 0%,#0f0f1f 100%)",
-          borderBottom: `1px solid ${C.border}`,
           padding: "0 24px",
           display: "flex",
           alignItems: "stretch",
@@ -1059,7 +1066,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             </div>
             <div
               style={{
-                fontSize: 9,
+                fontSize: 12,
                 color: C.muted,
                 letterSpacing: "0.14em",
                 whiteSpace: "nowrap",
@@ -1073,6 +1080,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
           style={{
             display: "flex",
             alignItems: "stretch",
+            marginLeft: "40px",
             gap: 0,
             flex: 1,
             overflowX: "auto",
@@ -1089,7 +1097,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
                 border: "none",
                 borderBottom: `2px solid ${tab === t ? C.indigo : "transparent"}`,
                 color: tab === t ? C.indigo : C.muted,
-                fontSize: 10,
+                fontSize: 12,
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 fontFamily: C.font,
@@ -1104,32 +1112,72 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             </button>
           ))}
         </nav>
+
+        {/* RIGHT GROUP: Stacked Back Button and Live Status */}
         <div
           style={{
             display: "flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 10,
-            color: C.muted,
+            flexDirection: "column",
+            alignItems: "flex-end", // Aligns everything to the right edge
+            justifyContent: "center",
+            gap: "4px",
             flexShrink: 0,
-            paddingLeft: 8,
+            paddingLeft: 16,
           }}
         >
+          {/* BACK BUTTON (Top Row) */}
+          <a
+            href="https://society-for-ai-in-enterprise-systems.vercel.app/index.html#projects"
+            style={{
+              textDecoration: "none",
+              color: C.indigo,
+              fontSize: "12px",
+              fontWeight: "700",
+              fontFamily: C.font,
+              letterSpacing: "0.05em",
+              transition: "opacity 0.2s",
+            }}
+            onMouseEnter={(e) => (e.target.style.opacity = 0.7)}
+            onMouseLeave={(e) => (e.target.style.opacity = 1)}
+          >
+            ← BACK TO PROJECTS
+          </a>
+
+          {/* LIVE STATUS (Bottom Row) */}
           <div
             style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: C.green,
-              boxShadow: `0 0 8px ${C.green}`,
-              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 12,
+              color: C.muted,
             }}
-          />
-          <span style={{ whiteSpace: "nowrap" }}>LIVE · 23 CUSTOMERS</span>
+          >
+            <div
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: C.green,
+                boxShadow: `0 0 8px ${C.green}`,
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ whiteSpace: "nowrap" }}>LIVE · 23 CUSTOMERS</span>
+          </div>
         </div>
       </div>
 
-      <div style={{ padding: "28px 32px", maxWidth: 1440, margin: "0 auto" }}>
+      <div
+        style={{
+          padding: "28px 32px",
+          maxWidth: 1440,
+          margin: "0 auto",
+          width: "100%",
+          flex: "1 0 auto" /* Tells the content to grow and not shrink */,
+          overscrollBehaviorY: "contain",
+        }}
+      >
         {/* OVERVIEW */}
         {tab === "Overview" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -1212,7 +1260,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             >
               <Panel>
                 <SLabel>Revenue by Category</SLabel>
-                <ResponsiveContainer width="100%" height={210}>
+                <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
                     <Pie
                       data={catSummary}
@@ -1222,12 +1270,15 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
                       cy="50%"
                       outerRadius={80}
                       innerRadius={36}
-                      paddingAngle={2}
+                      paddingAngle={2} /* Small gap between slices */
+                      minAngle={
+                        5
+                      } /* Forces small slices to be wide enough for labels */
                       label={({ cat, percent }) =>
                         `${(percent * 100).toFixed(0)}%`
                       }
                       labelLine={false}
-                      fontSize={10}
+                      fontSize={12}
                     >
                       {catSummary.map((c) => (
                         <Cell key={c.cat} fill={CAT_COLORS[c.cat] || C.muted} />
@@ -1242,20 +1293,23 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
                           {v}
                         </span>
                       )}
+                      wrapperStyle={{
+                        paddingTop: "20px",
+                      }} /* This pushes the legend down away from the chart */
                     />
                   </PieChart>
                 </ResponsiveContainer>
               </Panel>
               <Panel>
                 <SLabel>Gross Margin by Category</SLabel>
-                <ResponsiveContainer width="100%" height={210}>
+                <ResponsiveContainer width="100%" height={250}>
                   <BarChart
                     data={[...catSummary].sort((a, b) => b.margin - a.margin)}
                     layout="vertical"
                   >
                     <XAxis
                       type="number"
-                      domain={[0, 65]}
+                      domain={[0, 60]}
                       tick={{ fill: C.muted, fontSize: 10 }}
                       tickFormatter={(v) => `${v}%`}
                       axisLine={false}
@@ -1850,7 +1904,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
                     letterSpacing: "0.12em",
                   }}
                 >
-                  POWERED BY CLAUDE · TECHFLOW 2019 DATA
+                  POWERED BY GEMINI · TECHFLOW 2019 DATA
                 </div>
               </div>
             </div>
@@ -2026,6 +2080,22 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             </div>
           </div>
         )}
+        {/* FOOTER */}
+        <footer
+          style={{
+            marginTop: "48px",
+            padding: "24px 0",
+            borderTop: `1px solid ${C.border}`,
+            textAlign: "center",
+            color: C.muted,
+            fontSize: "12px",
+            fontFamily: C.font,
+            letterSpacing: "0.05em",
+          }}
+        >
+          A project by Lizzie Reyes — Society for AI in Enterprise Systems · Cal
+          State LA
+        </footer>
       </div>
     </div>
   );

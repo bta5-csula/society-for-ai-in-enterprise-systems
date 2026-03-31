@@ -1,3 +1,37 @@
+html {
+  background-color: #07080f; /* Colors the background gaps */
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  background-color: #07080f;
+  /* Stops the "white bounce" at top/bottom */
+  overscroll-behavior-y: none;
+  /* Allows scrolling left/right only if content is wider (like when zoomed) */
+  overflow-x: auto;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  background-color: #07080f;
+}
+
+body {
+  margin: 0;
+  background-color: #07080f;
+  /* 'visible' ensures the body expands to show all content and the footer */
+  overflow: visible;
+  /* Allows smooth panning on mobile/trackpads without the 'bounce' */
+  overscroll-behavior: auto;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -11,8 +45,8 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -52,18 +86,19 @@
 
 body {
   margin: 0;
+  overflow: hidden; /* Prevents the white "bounce" when scrolling */
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
 }
 
 h1,
@@ -108,4 +143,11 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+.glass-header {
+  background: rgba(13, 17, 23, 0.7) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #1f2937 !important;
 }
