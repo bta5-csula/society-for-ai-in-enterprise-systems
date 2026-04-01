@@ -628,8 +628,6 @@ const AI_STAGES = [
   { label: "Formatting response…", pct: 93, dur: 400 },
 ];
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-
 // ── RESPONSIVE HOOK ───────────────────────────────────────────────────────────
 function useWindowWidth() {
   const [w, setW] = useState(window.innerWidth);
@@ -641,6 +639,7 @@ function useWindowWidth() {
   return w;
 }
 
+// ── HELPERS ───────────────────────────────────────────────────────────────────
 const fmt = (n) =>
   n >= 1e6
     ? `$${(n / 1e6).toFixed(1)}M`
@@ -891,8 +890,8 @@ function AiProgressBar({ stage, pct }) {
 const TABS = ["Overview", "Customers", "Products", "Payments", "AI Analyst"];
 
 export default function App() {
-  const [tab, setTab] = useState("Overview");
   const isMobile = useWindowWidth() < 768;
+  const [tab, setTab] = useState("Overview");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [catFilter, setCatFilter] = useState("All");
   const [chatInput, setChatInput] = useState("");
@@ -1063,7 +1062,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        overflowX: "auto",
+        overflowX: "hidden",
         overflowY: "auto",
       }}
     >
@@ -1078,7 +1077,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
       <div
         className="glass-header"
         style={{
-          padding: isMobile ? "0 16px" : "0 24px",
+          padding: isMobile ? "0 14px" : "0 24px",
           display: "flex",
           flexDirection: isMobile ? "column" : "row",
           alignItems: isMobile ? "flex-start" : "stretch",
@@ -1086,8 +1085,10 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
           position: "sticky",
           top: 0,
           zIndex: 100,
+          width: "100%",
         }}
       >
+        {/* LOGO + TITLE */}
         <div
           style={{
             display: "flex",
@@ -1128,9 +1129,9 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             </div>
             <div
               style={{
-                fontSize: 12,
-                color: C.muted,
-                letterSpacing: "0.14em",
+                fontSize: isMobile ? 10 : 12,
+                color: "#cbd5e1",
+                letterSpacing: "0.1em",
                 whiteSpace: "nowrap",
               }}
             >
@@ -1138,17 +1139,18 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             </div>
           </div>
         </div>
+
+        {/* NAV TABS — inline on desktop, second row on mobile */}
         <nav
           style={{
             display: "flex",
             alignItems: "stretch",
-            marginLeft: isMobile ? "0px" : "40px",
-            marginTop: isMobile ? "0px" : "0px",
+            marginLeft: isMobile ? 0 : 40,
             gap: 0,
-            flex: 1,
+            flex: isMobile ? "unset" : 1,
+            width: isMobile ? "100%" : "auto",
             overflowX: "auto",
             scrollbarWidth: "none",
-            width: isMobile ? "100%" : "auto",
             borderTop: isMobile ? `1px solid ${C.border}` : "none",
           }}
         >
@@ -1157,13 +1159,14 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
               key={t}
               onClick={() => setTab(t)}
               style={{
-                padding: "0 12px",
+                padding: isMobile ? "10px 14px" : "0 12px",
+                height: isMobile ? "auto" : "100%",
                 background: "none",
                 border: "none",
                 borderBottom: `2px solid ${tab === t ? C.indigo : "transparent"}`,
-                color: tab === t ? C.indigo : C.muted,
-                fontSize: 12,
-                letterSpacing: "0.1em",
+                color: tab === t ? "#818cf8" : "#cbd5e1",
+                fontSize: isMobile ? 11 : 12,
+                letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 fontFamily: C.font,
                 cursor: "pointer",
@@ -1178,69 +1181,69 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
           ))}
         </nav>
 
-        {/* RIGHT GROUP: Stacked Back Button and Live Status */}
-        <div
-          style={{
-            display: isMobile ? "none" : "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            justifyContent: "center",
-            gap: "4px",
-            flexShrink: 0,
-            paddingLeft: 16,
-          }}
-        >
-          {/* BACK BUTTON (Top Row) */}
-          <a
-            href="https://society-for-ai-in-enterprise-systems.vercel.app/index.html#projects"
-            style={{
-              textDecoration: "none",
-              color: C.indigo,
-              fontSize: "12px",
-              fontWeight: "700",
-              fontFamily: C.font,
-              letterSpacing: "0.05em",
-              transition: "opacity 0.2s",
-            }}
-            onMouseEnter={(e) => (e.target.style.opacity = 0.7)}
-            onMouseLeave={(e) => (e.target.style.opacity = 1)}
-          >
-            ← BACK TO PROJECTS
-          </a>
-
-          {/* LIVE STATUS (Bottom Row) */}
+        {/* RIGHT GROUP — back button + live status, desktop only */}
+        {!isMobile && (
           <div
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 12,
-              color: C.muted,
+              flexDirection: "column",
+              alignItems: "flex-end",
+              justifyContent: "center",
+              gap: 4,
+              flexShrink: 0,
+              paddingLeft: 16,
             }}
           >
+            <a
+              href="https://society-for-ai-in-enterprise-systems.vercel.app/index.html#projects"
+              style={{
+                textDecoration: "none",
+                color: "#818cf8",
+                fontSize: "12px",
+                fontWeight: "700",
+                fontFamily: C.font,
+                letterSpacing: "0.05em",
+                transition: "opacity 0.2s",
+              }}
+              onMouseEnter={(e) => (e.target.style.opacity = 0.7)}
+              onMouseLeave={(e) => (e.target.style.opacity = 1)}
+            >
+              ← BACK TO PROJECTS
+            </a>
             <div
               style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: C.green,
-                boxShadow: `0 0 8px ${C.green}`,
-                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                color: "#cbd5e1",
               }}
-            />
-            <span style={{ whiteSpace: "nowrap" }}>LIVE · 23 CUSTOMERS</span>
+            >
+              <div
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: C.green,
+                  boxShadow: `0 0 8px ${C.green}`,
+                  flexShrink: 0,
+                }}
+              />
+              <span style={{ whiteSpace: "nowrap" }}>LIVE · 23 CUSTOMERS</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      <div
+      <main
         style={{
           padding: isMobile ? "16px 14px" : "28px 32px",
           maxWidth: 1440,
           margin: "0 auto",
           width: "100%",
-          flex: "1 0 auto" /* Tells the content to grow and not shrink */,
+          flex: "1 0 auto",
           overscrollBehaviorY: "contain",
+          boxSizing: "border-box",
         }}
       >
         {/* OVERVIEW */}
@@ -1250,10 +1253,9 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
               style={{
                 display: "grid",
                 gridTemplateColumns: isMobile
-                  ? "repeat(2, 1fr)"
-                  : "repeat(4, 1fr)",
-                gap: isMobile ? 10 : 16,
-                marginBottom: 24,
+                  ? "repeat(2,1fr)"
+                  : "repeat(4,1fr)",
+                gap: 14,
               }}
             >
               <KpiCard
@@ -1284,17 +1286,22 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             <Panel>
               <SLabel>Monthly Revenue vs. Profit</SLabel>
               <ResponsiveContainer width="100%" height={230}>
-                <BarChart data={MONTHLY} barGap={4} barCategoryGap="30%">
+                <BarChart
+                  data={MONTHLY}
+                  barGap={4}
+                  barCategoryGap="30%"
+                  margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+                >
                   <XAxis
                     dataKey="month"
                     tickFormatter={(m) => MONTH_NAMES[m]}
-                    tick={{ fill: C.muted, fontSize: 11 }}
+                    tick={{ fill: "#cbd5e1", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis
                     tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`}
-                    tick={{ fill: C.muted, fontSize: 11 }}
+                    tick={{ fill: "#cbd5e1", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                     width={48}
@@ -1322,33 +1329,27 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: isMobile
-                  ? "repeat(2, 1fr)"
-                  : "repeat(2, 1fr)",
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                 gap: 16,
               }}
             >
               <Panel>
                 <SLabel>Revenue by Category</SLabel>
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={isMobile ? 280 : 280}>
                   <PieChart>
                     <Pie
                       data={catSummary}
                       dataKey="revenue"
                       nameKey="cat"
                       cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      innerRadius={36}
-                      paddingAngle={2} /* Small gap between slices */
-                      minAngle={
-                        5
-                      } /* Forces small slices to be wide enough for labels */
-                      label={({ cat, percent }) =>
-                        `${(percent * 100).toFixed(0)}%`
-                      }
-                      labelLine={false}
-                      fontSize={12}
+                      cy="42%"
+                      outerRadius={isMobile ? 85 : 80}
+                      innerRadius={isMobile ? 38 : 36}
+                      paddingAngle={2}
+                      minAngle={5}
+                      label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                      labelLine={true}
+                      fontSize={11}
                     >
                       {catSummary.map((c) => (
                         <Cell key={c.cat} fill={CAT_COLORS[c.cat] || C.muted} />
@@ -1359,28 +1360,27 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
                       iconType="circle"
                       iconSize={8}
                       formatter={(v) => (
-                        <span style={{ fontSize: 11, color: C.muted }}>
+                        <span style={{ fontSize: 11, color: "#cbd5e1" }}>
                           {v}
                         </span>
                       )}
-                      wrapperStyle={{
-                        paddingTop: "20px",
-                      }} /* This pushes the legend down away from the chart */
+                      wrapperStyle={{ paddingTop: "4px" }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
               </Panel>
               <Panel>
                 <SLabel>Gross Margin by Category</SLabel>
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={isMobile ? 220 : 280}>
                   <BarChart
                     data={[...catSummary].sort((a, b) => b.margin - a.margin)}
                     layout="vertical"
+                    margin={{ top: 0, right: 16, left: 0, bottom: 0 }}
                   >
                     <XAxis
                       type="number"
                       domain={[0, 60]}
-                      tick={{ fill: C.muted, fontSize: 10 }}
+                      tick={{ fill: "#cbd5e1", fontSize: 10 }}
                       tickFormatter={(v) => `${v}%`}
                       axisLine={false}
                       tickLine={false}
@@ -1388,10 +1388,10 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
                     <YAxis
                       type="category"
                       dataKey="cat"
-                      tick={{ fill: C.muted, fontSize: 10 }}
+                      tick={{ fill: "#cbd5e1", fontSize: isMobile ? 9 : 10 }}
                       axisLine={false}
                       tickLine={false}
-                      width={90}
+                      width={isMobile ? 80 : 90}
                     />
                     <Tooltip content={<ChartTip valFmt={(v) => `${v}%`} />} />
                     <Bar dataKey="margin" name="Margin" radius={[0, 4, 4, 0]}>
@@ -1413,7 +1413,13 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
 
         {/* CUSTOMERS */}
         {tab === "Customers" && (
-          <div style={{ display: "flex", gap: 20 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              gap: 20,
+            }}
+          >
             <div
               style={{
                 flex: 1,
@@ -1567,14 +1573,14 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
                 return (
                   <div
                     style={{
-                      width: 300,
+                      width: isMobile ? "100%" : 300,
                       background: C.card,
                       border: `1px solid ${C.indigo}`,
                       borderRadius: 14,
                       padding: 22,
                       alignSelf: "flex-start",
-                      position: "sticky",
-                      top: 76,
+                      position: isMobile ? "relative" : "sticky",
+                      top: isMobile ? "auto" : 76,
                       animation: "fadeIn 0.2s ease",
                     }}
                   >
@@ -1741,8 +1747,8 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
                     <div
                       style={{
                         display: "grid",
-                        gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-                        gap: 16,
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 10,
                       }}
                     >
                       {[
@@ -1833,12 +1839,12 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
                 <BarChart data={PAY_DIST}>
                   <XAxis
                     dataKey="days"
-                    tick={{ fill: C.muted, fontSize: 10 }}
+                    tick={{ fill: "#cbd5e1", fontSize: 10 }}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis
-                    tick={{ fill: C.muted, fontSize: 10 }}
+                    tick={{ fill: "#cbd5e1", fontSize: 10 }}
                     axisLine={false}
                     tickLine={false}
                   />
@@ -1936,7 +1942,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
               display: "flex",
               flexDirection: "column",
               gap: 16,
-              maxWidth: 820,
+              maxWidth: isMobile ? "100%" : 820,
               margin: "0 auto",
               width: "100%",
             }}
@@ -2157,7 +2163,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             padding: "24px 0",
             borderTop: `1px solid ${C.border}`,
             textAlign: "center",
-            color: C.muted,
+            color: "#cbd5e1",
             fontSize: "12px",
             fontFamily: C.font,
             letterSpacing: "0.05em",
@@ -2166,7 +2172,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
           A project by Lizzie Reyes — Society for AI in Enterprise Systems · Cal
           State LA
         </footer>
-      </div>
+      </main>
     </div>
   );
 }
