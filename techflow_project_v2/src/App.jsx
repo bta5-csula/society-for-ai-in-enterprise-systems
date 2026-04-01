@@ -1484,13 +1484,21 @@ export default function App() {
         {tab === "Customers" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <SectionLabel>Customer Master · 23 Accounts</SectionLabel>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 10,
+                alignItems: "center",
+              }}
+            >
               <input
                 value={custSearch}
                 onChange={(e) => setCustSearch(e.target.value)}
                 placeholder="Search customer or city…"
                 style={{
                   flex: 1,
+                  minWidth: isMobile ? "100%" : "auto", // full width on mobile so buttons wrap below
                   maxWidth: 300,
                   background: T.bg2,
                   border: `1px solid ${T.border2}`,
@@ -1537,160 +1545,170 @@ export default function App() {
               </div>
             </div>
             <Panel style={{ padding: 0, overflow: "hidden" }}>
-              <table
+              {/* Horizontal scroll on mobile so all columns remain accessible */}
+              <div
                 style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  fontSize: 12,
+                  overflowX: isMobile ? "auto" : "visible",
+                  WebkitOverflowScrolling: "touch",
                 }}
               >
-                <thead>
-                  <tr style={{ background: T.bg3 }}>
-                    {[
-                      "Customer",
-                      "Segment",
-                      "Location",
-                      "Revenue",
-                      "Txns",
-                      "Avg Days",
-                      "Late %",
-                      "Credit",
-                      "Risk",
-                    ].map((h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: "10px 14px",
-                          textAlign: "left",
-                          fontSize: 10,
-                          letterSpacing: "0.14em",
-                          color: T.text1,
-                          textTransform: "uppercase",
-                          borderBottom: `1px solid ${T.border}`,
-                          fontWeight: 400,
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCustomers.map((c, i) => (
-                    <tr
-                      key={c.id}
-                      onClick={() =>
-                        setSelCust(selCust?.id === c.id ? null : c)
-                      }
-                      style={{
-                        background:
-                          selCust?.id === c.id
-                            ? `${T.accent}08`
-                            : i % 2 === 0
-                              ? T.bg2
-                              : T.bg1,
-                        borderLeft: `3px solid ${selCust?.id === c.id ? T.accent : "transparent"}`,
-                        cursor: "pointer",
-                        transition: "background 0.15s",
-                      }}
-                    >
-                      <td
-                        style={{
-                          padding: "11px 14px",
-                          color: T.text0,
-                          fontWeight: 600,
-                        }}
-                      >
-                        {c.name}
-                      </td>
-                      <td style={{ padding: "11px 14px" }}>
-                        <Pill color={segColor(c.seg)}>{c.seg}</Pill>
-                      </td>
-                      <td style={{ padding: "11px 14px", color: T.text1 }}>
-                        {c.country} · {c.city}
-                      </td>
-                      <td
-                        style={{
-                          padding: "11px 14px",
-                          color: T.accent,
-                          fontWeight: 700,
-                        }}
-                      >
-                        {fm(c.revenue)}
-                      </td>
-                      <td style={{ padding: "11px 14px", color: T.text1 }}>
-                        {c.txns}
-                      </td>
-                      <td
-                        style={{
-                          padding: "11px 14px",
-                          color:
-                            c.avgDays > 100
-                              ? T.red
-                              : c.avgDays > 50
-                                ? T.yellow
-                                : T.green,
-                          fontWeight: 700,
-                        }}
-                      >
-                        {c.avgDays}d
-                      </td>
-                      <td style={{ padding: "11px 14px" }}>
-                        <div
+                <table
+                  style={{
+                    width: "100%",
+                    minWidth: isMobile ? 640 : "auto", // ensures columns don't squish below readable size
+                    borderCollapse: "collapse",
+                    fontSize: 12,
+                  }}
+                >
+                  <thead>
+                    <tr style={{ background: T.bg3 }}>
+                      {[
+                        "Customer",
+                        "Segment",
+                        "Location",
+                        "Revenue",
+                        "Txns",
+                        "Avg Days",
+                        "Late %",
+                        "Credit",
+                        "Risk",
+                      ].map((h) => (
+                        <th
+                          key={h}
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 8,
+                            padding: "10px 14px",
+                            textAlign: "left",
+                            fontSize: 10,
+                            letterSpacing: "0.14em",
+                            color: T.text1,
+                            textTransform: "uppercase",
+                            borderBottom: `1px solid ${T.border}`,
+                            fontWeight: 400,
                           }}
                         >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredCustomers.map((c, i) => (
+                      <tr
+                        key={c.id}
+                        onClick={() =>
+                          setSelCust(selCust?.id === c.id ? null : c)
+                        }
+                        style={{
+                          background:
+                            selCust?.id === c.id
+                              ? `${T.accent}08`
+                              : i % 2 === 0
+                                ? T.bg2
+                                : T.bg1,
+                          borderLeft: `3px solid ${selCust?.id === c.id ? T.accent : "transparent"}`,
+                          cursor: "pointer",
+                          transition: "background 0.15s",
+                        }}
+                      >
+                        <td
+                          style={{
+                            padding: "11px 14px",
+                            color: T.text0,
+                            fontWeight: 600,
+                          }}
+                        >
+                          {c.name}
+                        </td>
+                        <td style={{ padding: "11px 14px" }}>
+                          <Pill color={segColor(c.seg)}>{c.seg}</Pill>
+                        </td>
+                        <td style={{ padding: "11px 14px", color: T.text1 }}>
+                          {c.country} · {c.city}
+                        </td>
+                        <td
+                          style={{
+                            padding: "11px 14px",
+                            color: T.accent,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {fm(c.revenue)}
+                        </td>
+                        <td style={{ padding: "11px 14px", color: T.text1 }}>
+                          {c.txns}
+                        </td>
+                        <td
+                          style={{
+                            padding: "11px 14px",
+                            color:
+                              c.avgDays > 100
+                                ? T.red
+                                : c.avgDays > 50
+                                  ? T.yellow
+                                  : T.green,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {c.avgDays}d
+                        </td>
+                        <td style={{ padding: "11px 14px" }}>
                           <div
                             style={{
-                              flex: 1,
-                              maxWidth: 60,
-                              height: 4,
-                              background: T.bg3,
-                              borderRadius: 2,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
                             }}
                           >
                             <div
                               style={{
-                                height: "100%",
-                                width: `${c.latePct}%`,
-                                background:
+                                flex: 1,
+                                maxWidth: 60,
+                                height: 4,
+                                background: T.bg3,
+                                borderRadius: 2,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  height: "100%",
+                                  width: `${c.latePct}%`,
+                                  background:
+                                    c.latePct === 100
+                                      ? T.red
+                                      : c.latePct > 70
+                                        ? T.yellow
+                                        : T.green,
+                                  borderRadius: 2,
+                                }}
+                              />
+                            </div>
+                            <span
+                              style={{
+                                color:
                                   c.latePct === 100
                                     ? T.red
                                     : c.latePct > 70
                                       ? T.yellow
                                       : T.green,
-                                borderRadius: 2,
+                                fontWeight: 700,
                               }}
-                            />
+                            >
+                              {c.latePct}%
+                            </span>
                           </div>
-                          <span
-                            style={{
-                              color:
-                                c.latePct === 100
-                                  ? T.red
-                                  : c.latePct > 70
-                                    ? T.yellow
-                                    : T.green,
-                              fontWeight: 700,
-                            }}
-                          >
-                            {c.latePct}%
-                          </span>
-                        </div>
-                      </td>
-                      <td style={{ padding: "11px 14px", color: T.text1 }}>
-                        ${(c.credit / 1000).toFixed(0)}K
-                      </td>
-                      <td style={{ padding: "11px 14px" }}>
-                        <Pill color={riskColor(c.risk)}>{c.risk}</Pill>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        </td>
+                        <td style={{ padding: "11px 14px", color: T.text1 }}>
+                          ${(c.credit / 1000).toFixed(0)}K
+                        </td>
+                        <td style={{ padding: "11px 14px" }}>
+                          <Pill color={riskColor(c.risk)}>{c.risk}</Pill>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* end horizontal scroll wrapper */}
             </Panel>
             {selCust && (
               <div
