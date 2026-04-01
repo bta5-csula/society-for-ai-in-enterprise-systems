@@ -3,5 +3,5 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/project_name/dist/',
+  base: '/audit_analytics_project/dist/',
 })
