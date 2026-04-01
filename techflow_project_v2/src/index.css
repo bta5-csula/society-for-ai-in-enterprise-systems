@@ -8,8 +8,19 @@ html {
 body {
   margin: 0;
   background-color: #04050a;
-  overflow: hidden;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden; /* IMPORTANT: Desktop default — keeps your current look exactly */
   overscroll-behavior: none;
+}
+
+/* IMPORTANT: Mobile needs to scroll vertically, but still no white bounce */
+@media (max-width: 768px) {
+  body {
+    overflow-y: auto;
+    overscroll-behavior: none;
+  }
 }
 
 #root {
@@ -73,14 +84,6 @@ body {
   #social .button-icon {
     filter: invert(1) brightness(2);
   }
-}
-
-body {
-  margin: 0;
-  overflow: hidden; /* Prevents the white "bounce" when scrolling */
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 h1,

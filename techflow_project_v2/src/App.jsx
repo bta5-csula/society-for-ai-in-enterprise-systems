@@ -814,6 +814,14 @@ export default function App() {
   const [aiPct, setAiPct] = useState(0);
   const chatRef = useRef(null);
   const timerRefs = useRef([]);
+  // Responsive breakpoint — mirrors V1 approach
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (chatRef.current)
@@ -935,10 +943,10 @@ export default function App() {
       style={{
         fontFamily: T.font,
         background: T.bg0,
-        height: "100vh",
+        minHeight: "100vh", // minHeight instead of height so content can grow on mobile
         width: "100%",
         color: T.text0,
-        overflowX: "auto",
+        overflowX: "hidden", // IMPORTANT: prevents horizontal scroll on mobile
         overflowY: "auto",
       }}
     >
@@ -950,12 +958,15 @@ export default function App() {
       `}</style>
 
       {/* ── TOPBAR ── */}
+      {/* Desktop: [logo] [tabs] [back+verified] in one row (flex row, space-between) */}
+      {/* Mobile: [logo | back] on top row, [tabs] on second row (flex column) */}
       <div
         className="glass-header"
         style={{
-          padding: "0 28px",
+          padding: isMobile ? "0 16px" : "0 28px",
           minHeight: 64,
           display: "flex",
+          flexDirection: isMobile ? "column" : "row",
           alignItems: "stretch",
           justifyContent: "space-between",
           position: "sticky",
@@ -963,65 +974,106 @@ export default function App() {
           zIndex: 100,
         }}
       >
+        {/* On desktop this is just the logo section (left side).
+            On mobile it becomes the full top row containing logo + back button. */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 12,
-            padding: "12px 0",
+            justifyContent: "space-between", // pushes back button to right on mobile
             flexShrink: 0,
+            minHeight: isMobile ? 52 : "auto",
           }}
         >
+          {/* Logo + title */}
           <div
             style={{
-              width: 32,
-              height: 32,
-              borderRadius: 6,
-              flexShrink: 0,
-              background: `linear-gradient(135deg,${T.accent},${T.purple})`,
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontSize: 11,
-              fontWeight: 900,
-              color: "#000",
+              gap: 12,
+              padding: isMobile ? "0" : "12px 0",
+              flexShrink: 0,
             }}
           >
-            TF
-          </div>
-          <div>
             <div
               style={{
-                fontSize: 12,
+                width: 32,
+                height: 32,
+                borderRadius: 6,
+                flexShrink: 0,
+                background: `linear-gradient(135deg,${T.accent},${T.purple})`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 11,
+                fontWeight: 900,
+                color: "#000",
+              }}
+            >
+              TF
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: T.text0,
+                  letterSpacing: "0.02em",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                TechFlow NexCore
+              </div>
+              {/* Subtitle hidden on mobile to save space */}
+              {!isMobile && (
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: T.text1,
+                    letterSpacing: "0.12em",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  FY 2023 · ORDER-TO-CASH ANALYTICS
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* BACK BUTTON — shown inline with logo on mobile only.
+              On desktop this is hidden here; the real one is in the right section below. */}
+          {isMobile && (
+            <a
+              href="https://society-for-ai-in-enterprise-systems.vercel.app/index.html#projects"
+              style={{
+                textDecoration: "none",
+                color: T.accent,
+                fontSize: 11,
                 fontWeight: 700,
-                color: T.text0,
-                letterSpacing: "0.02em",
-                whiteSpace: "nowrap",
+                fontFamily: T.font,
+                letterSpacing: "0.05em",
+                transition: "opacity 0.2s",
               }}
+              onMouseEnter={(e) => (e.target.style.opacity = 0.7)}
+              onMouseLeave={(e) => (e.target.style.opacity = 1)}
             >
-              TechFlow NexCore
-            </div>
-            <div
-              style={{
-                fontSize: 12,
-                color: T.text1,
-                letterSpacing: "0.12em",
-                whiteSpace: "nowrap",
-              }}
-            >
-              FY 2023 · ORDER-TO-CASH ANALYTICS
-            </div>
-          </div>
+              ← BACK
+            </a>
+          )}
         </div>
+
+        {/* ── TAB STRIP ── center on desktop, second row on mobile ── */}
         <div
           style={{
             display: "flex",
             alignItems: "stretch",
             gap: 0,
-            flex: 1,
+            flex: isMobile ? "none" : 1,
             overflowX: "auto",
             scrollbarWidth: "none",
-            marginLeft: "40px",
+            marginLeft: isMobile ? 0 : "40px",
+            // Thin separator between logo row and tabs on mobile
+            borderTop: isMobile ? `1px solid ${T.border}` : "none",
           }}
         >
           {TABS.map((t) => (
@@ -1029,12 +1081,12 @@ export default function App() {
               key={t}
               onClick={() => setTab(t)}
               style={{
-                padding: "0 10px",
+                padding: isMobile ? "10px 10px" : "0 10px",
                 background: "none",
                 border: "none",
                 borderBottom: `2px solid ${tab === t ? T.accent : "transparent"}`,
                 color: tab === t ? T.accent : T.text1,
-                fontSize: 12,
+                fontSize: isMobile ? 10 : 12,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 fontFamily: T.font,
@@ -1049,63 +1101,67 @@ export default function App() {
             </button>
           ))}
         </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            justifyContent: "center",
-            gap: 4,
-            flexShrink: 0,
-            paddingLeft: 8,
-          }}
-        >
-          {/* BACK BUTTON (Top Row) */}
-          <a
-            href="https://society-for-ai-in-enterprise-systems.vercel.app/index.html#projects"
-            style={{
-              textDecoration: "none",
-              color: T.accent,
-              fontSize: 12,
-              fontWeight: 700,
-              fontFamily: T.font,
-              letterSpacing: "0.05em",
-              transition: "opacity 0.2s",
-            }}
-            onMouseEnter={(e) => (e.target.style.opacity = 0.7)}
-            onMouseLeave={(e) => (e.target.style.opacity = 1)}
-          >
-            ← BACK TO PROJECTS
-          </a>
 
-          {/* VERIFIED INDICATOR */}
+        {/* ── RIGHT SECTION — desktop only: back button + verified indicator ── */}
+        {!isMobile && (
           <div
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: 6,
-              fontSize: 12,
-              color: T.text1,
+              flexDirection: "column",
+              alignItems: "flex-end",
+              justifyContent: "center",
+              gap: 4,
+              flexShrink: 0,
+              paddingLeft: 8,
             }}
           >
+            {/* BACK BUTTON (Top Row) */}
+            <a
+              href="https://society-for-ai-in-enterprise-systems.vercel.app/index.html#projects"
+              style={{
+                textDecoration: "none",
+                color: T.accent,
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: T.font,
+                letterSpacing: "0.05em",
+                transition: "opacity 0.2s",
+              }}
+              onMouseEnter={(e) => (e.target.style.opacity = 0.7)}
+              onMouseLeave={(e) => (e.target.style.opacity = 1)}
+            >
+              ← BACK TO PROJECTS
+            </a>
+
+            {/* VERIFIED INDICATOR */}
             <div
               style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: T.green,
-                boxShadow: `0 0 8px ${T.green}`,
-                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                color: T.text1,
               }}
-            />
-            <span style={{ whiteSpace: "nowrap" }}>VERIFIED · 5,000 TXN</span>
+            >
+              <div
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: T.green,
+                  boxShadow: `0 0 8px ${T.green}`,
+                  flexShrink: 0,
+                }}
+              />
+              <span style={{ whiteSpace: "nowrap" }}>VERIFIED · 5,000 TXN</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div
         style={{
-          padding: "24px 28px",
+          padding: isMobile ? "16px" : "24px 28px",
           width: "100%",
           margin: "0 auto",
           boxSizing: "border-box",
@@ -1118,7 +1174,9 @@ export default function App() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(5,1fr)",
+                gridTemplateColumns: isMobile
+                  ? "repeat(2,1fr)"
+                  : "repeat(5,1fr)",
                 gap: 12,
               }}
             >
@@ -1156,7 +1214,7 @@ export default function App() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "2fr 1fr",
+                gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr",
                 gap: 16,
               }}
             >
@@ -1306,7 +1364,7 @@ export default function App() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                 gap: 16,
               }}
             >
@@ -1638,11 +1696,11 @@ export default function App() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
                   gap: 12,
                 }}
               >
-                <Panel style={{ gridColumn: "1/3" }}>
+                <Panel style={{ gridColumn: isMobile ? "1" : "1/3" }}>
                   <div
                     style={{
                       display: "flex",
@@ -1675,7 +1733,9 @@ export default function App() {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(4,1fr)",
+                      gridTemplateColumns: isMobile
+                        ? "repeat(2,1fr)"
+                        : "repeat(4,1fr)",
                       gap: 12,
                     }}
                   >
@@ -1786,7 +1846,7 @@ export default function App() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                 gap: 16,
               }}
             >
@@ -1923,7 +1983,9 @@ export default function App() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(4,1fr)",
+                gridTemplateColumns: isMobile
+                  ? "repeat(2,1fr)"
+                  : "repeat(4,1fr)",
                 gap: 12,
               }}
             >
@@ -2024,7 +2086,9 @@ export default function App() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(4,1fr)",
+                gridTemplateColumns: isMobile
+                  ? "repeat(2,1fr)"
+                  : "repeat(4,1fr)",
                 gap: 12,
               }}
             >
@@ -2102,7 +2166,7 @@ export default function App() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(3,1fr)",
+                  gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)",
                   gap: 10,
                 }}
               >
@@ -2197,7 +2261,9 @@ export default function App() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(5,1fr)",
+                gridTemplateColumns: isMobile
+                  ? "repeat(2,1fr)"
+                  : "repeat(5,1fr)",
                 gap: 12,
               }}
             >
@@ -2214,7 +2280,7 @@ export default function App() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                 gap: 16,
               }}
             >
@@ -2389,7 +2455,7 @@ export default function App() {
                 border: `1px solid ${T.border}`,
                 borderRadius: 10,
                 padding: 20,
-                height: 500,
+                height: isMobile ? 300 : 500, // Shorter on mobile to fit viewport
                 overflowY: "auto",
                 display: "flex",
                 flexDirection: "column",
