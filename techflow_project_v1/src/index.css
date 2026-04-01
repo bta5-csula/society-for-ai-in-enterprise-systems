@@ -7,29 +7,21 @@ html {
 body {
   margin: 0;
   background-color: #07080f;
-  /* Stops the "white bounce" at top/bottom */
-  overscroll-behavior-y: none;
-  /* Allows scrolling left/right only if content is wider (like when zoomed) */
-  overflow-x: auto;
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden; /* IMPORTANT: Desktop default — keeps your current look exactly */
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow-y: auto; /* Mobile needs to scroll vertically */
+    overscroll-behavior: none; /* But still no white bounce */
+  }
 }
 
 #root {
   background-color: #07080f;
-}
-
-body {
-  margin: 0;
-  background-color: #07080f;
-  /* 'visible' ensures the body expands to show all content and the footer */
-  overflow: visible;
-  /* Allows smooth panning on mobile/trackpads without the 'bounce' */
-  overscroll-behavior: auto;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 :root {
@@ -82,14 +74,6 @@ body {
   #social .button-icon {
     filter: invert(1) brightness(2);
   }
-}
-
-body {
-  margin: 0;
-  overflow: hidden; /* Prevents the white "bounce" when scrolling */
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {

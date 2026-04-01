@@ -629,6 +629,18 @@ const AI_STAGES = [
 ];
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
+
+// ── RESPONSIVE HOOK ───────────────────────────────────────────────────────────
+function useWindowWidth() {
+  const [w, setW] = useState(window.innerWidth);
+  useEffect(() => {
+    const handler = () => setW(window.innerWidth);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return w;
+}
+
 const fmt = (n) =>
   n >= 1e6
     ? `$${(n / 1e6).toFixed(1)}M`
@@ -880,6 +892,7 @@ const TABS = ["Overview", "Customers", "Products", "Payments", "AI Analyst"];
 
 export default function App() {
   const [tab, setTab] = useState("Overview");
+  const isMobile = useWindowWidth() < 768;
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [catFilter, setCatFilter] = useState("All");
   const [chatInput, setChatInput] = useState("");
@@ -988,7 +1001,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
       // 2.4. ══ QUOTA LIMIT CHECK ══
       if (!finalReply || finalReply === "{}" || finalReply === "undefined") {
         finalReply =
-          "AI Analyst is unfortunately unavailable for the rest of today.";
+          "AI analyst is unfortunately unavailable for the rest of today.";
       }
 
       // 3. UI Cleanup
@@ -1065,9 +1078,10 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
       <div
         className="glass-header"
         style={{
-          padding: "0 24px",
+          padding: isMobile ? "0 16px" : "0 24px",
           display: "flex",
-          alignItems: "stretch",
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "flex-start" : "stretch",
           justifyContent: "space-between",
           position: "sticky",
           top: 0,
@@ -1128,11 +1142,14 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
           style={{
             display: "flex",
             alignItems: "stretch",
-            marginLeft: "40px",
+            marginLeft: isMobile ? "0px" : "40px",
+            marginTop: isMobile ? "0px" : "0px",
             gap: 0,
             flex: 1,
             overflowX: "auto",
             scrollbarWidth: "none",
+            width: isMobile ? "100%" : "auto",
+            borderTop: isMobile ? `1px solid ${C.border}` : "none",
           }}
         >
           {TABS.map((t) => (
@@ -1164,9 +1181,9 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
         {/* RIGHT GROUP: Stacked Back Button and Live Status */}
         <div
           style={{
-            display: "flex",
+            display: isMobile ? "none" : "flex",
             flexDirection: "column",
-            alignItems: "flex-end", // Aligns everything to the right edge
+            alignItems: "flex-end",
             justifyContent: "center",
             gap: "4px",
             flexShrink: 0,
@@ -1218,7 +1235,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
 
       <div
         style={{
-          padding: "28px 32px",
+          padding: isMobile ? "16px 14px" : "28px 32px",
           maxWidth: 1440,
           margin: "0 auto",
           width: "100%",
@@ -1232,8 +1249,11 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(4,1fr)",
-                gap: 14,
+                gridTemplateColumns: isMobile
+                  ? "repeat(2, 1fr)"
+                  : "repeat(4, 1fr)",
+                gap: isMobile ? 10 : 16,
+                marginBottom: 24,
               }}
             >
               <KpiCard
@@ -1302,7 +1322,9 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                gridTemplateColumns: isMobile
+                  ? "repeat(2, 1fr)"
+                  : "repeat(2, 1fr)",
                 gap: 16,
               }}
             >
@@ -1719,8 +1741,8 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
                     <div
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: 10,
+                        gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                        gap: 16,
                       }}
                     >
                       {[
@@ -1782,7 +1804,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3,1fr)",
+                gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)",
                 gap: 14,
               }}
             >
@@ -1964,7 +1986,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
                 border: `1px solid ${C.border}`,
                 borderRadius: 12,
                 padding: 20,
-                height: 460,
+                height: isMobile ? 300 : 460,
                 overflowY: "auto",
                 display: "flex",
                 flexDirection: "column",
