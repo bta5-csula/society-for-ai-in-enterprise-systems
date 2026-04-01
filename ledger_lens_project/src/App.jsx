@@ -74,8 +74,8 @@ export default function TaxAIGuide() {
     <main
       style={{
         minHeight: "100vh",
-        background: isPrinting ? "#ffffff" : "#0a1520",
-        color: isPrinting ? "#000000" : "#c8dde8",
+        background: "var(--bg-main)",
+        color: "var(--text-main)",
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         padding: 0,
         position: "relative",
@@ -83,11 +83,46 @@ export default function TaxAIGuide() {
     >
       <style dangerouslySetInnerHTML={{
         __html: `
-        .nav-container div::-webkit-scrollbar { display: none; }
-        @media print {
-          body, html, main { background: #ffffff !important; color: #000000 !important; height: auto !important; }
-          .screen-only { display: none !important; }
+        :root {
+          --bg-main: #0a1520;
+          --bg-card: #0d1e2a;
+          --bg-card-alt: #0a2233;
+          --bg-card-dark: #060e14;
+          --text-main: #c8dde8;
+          --text-bright: #e2c074;
+          --text-muted: #8cabb8;
+          --text-dim: #5bc8d4;
+          --border-main: #1e3a4a;
+          --accent: #5bc8d4;
         }
+
+        .nav-container div::-webkit-scrollbar { display: none; }
+        
+        @media print {
+          :root {
+            --bg-main: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-alt: #f8f9fa;
+            --bg-card-dark: #f1f3f5;
+            --text-main: #000000;
+            --text-bright: #94711a;
+            --text-muted: #444444;
+            --text-dim: #222222;
+            --border-main: #cccccc;
+            --accent: #008899;
+          }
+          body, html, main { 
+            background: #ffffff !important; 
+            color: #000000 !important; 
+            height: auto !important; 
+            overflow: visible !important;
+          }
+          #root { height: auto !important; overflow: visible !important; }
+          .screen-only { display: none !important; }
+          .print-header { display: block !important; }
+          .step-container { page-break-inside: avoid; border-bottom: 1px solid #eee; padding-bottom: 2rem; margin-bottom: 2rem; }
+        }
+
         /* Tablet (≤768px) */
         @media (max-width: 768px) {
           .site-title { font-size: 24px !important; }
@@ -174,13 +209,13 @@ export default function TaxAIGuide() {
               <Printer size={16} /><span className="print-btn-label"> Print Full Report</span>
             </button>
 
-            <div className="header-sub" style={{ color: isPrinting ? "#555" : "#5bc8d4", fontSize: 11, letterSpacing: 4, marginBottom: 8, fontWeight: 600 }}>
+            <div className="header-sub" style={{ color: "var(--text-dim)", fontSize: 11, letterSpacing: 4, marginBottom: 8, fontWeight: 600 }}>
               ENTERPRISE AI FOR TAX PROFESSIONALS
             </div>
-            <h1 className="site-title" style={{ color: isPrinting ? "#000" : "#e2c074", fontSize: 28, fontWeight: 700, margin: "0 0 8px" }}>
+            <h1 className="site-title" style={{ color: "var(--text-bright)", fontSize: 28, fontWeight: 700, margin: "0 0 8px" }}>
               From Bike Sales Data → Tax Intelligence
             </h1>
-            <p className="header-desc" style={{ color: isPrinting ? "#555" : "#b0c4cf", fontSize: 13, margin: 0 }}>
+            <p className="header-desc" style={{ color: "var(--text-main)", fontSize: 13, margin: 0 }}>
               A practical walkthrough for public accounting professionals
             </p>
           </div>
@@ -245,11 +280,11 @@ export default function TaxAIGuide() {
               {steps.map((s, index) => {
                 const StepContent = s.content;
                 return (
-                  <div key={s.id} style={{ pageBreakInside: "avoid" }}>
-                    <h2 style={{ fontSize: 20, color: "#000", borderBottom: "2px solid #ccc", paddingBottom: "10px", marginBottom: "20px" }}>
+                  <div key={s.id} className="step-container">
+                    <h2 style={{ fontSize: 24, color: "var(--text-bright)", borderBottom: "2px solid var(--border-main)", paddingBottom: "10px", marginBottom: "20px" }}>
                       Step {index + 1}: {s.title}
                     </h2>
-                    <StepContent />
+                    <StepContent isPrinting={true} />
                   </div>
                 );
               })}
@@ -257,13 +292,12 @@ export default function TaxAIGuide() {
           ) : (
             /* --- STANDARD INTERACTIVE INTERFACE --- */
             <>
-
               {/* Content Container */}
               <div
                 className="screen-only content-panel"
                 style={{
-                  background: "#0d1e2a",
-                  border: "1px solid #1e3a4a",
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border-main)",
                   borderRadius: 12,
                   padding: 24,
                   minHeight: "450px",
@@ -279,17 +313,17 @@ export default function TaxAIGuide() {
                   >
                     <h2
                       style={{
-                        color: "#e2c074",
+                        color: "var(--text-bright)",
                         fontSize: 18,
                         marginTop: 0,
                         marginBottom: 20,
                         paddingBottom: 12,
-                        borderBottom: "1px solid #1e3a4a",
+                        borderBottom: "1px solid var(--border-main)",
                       }}
                     >
                       {steps[activeStep].title}
                     </h2>
-                    <ActiveComponent />
+                    <ActiveComponent isPrinting={false} />
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -307,8 +341,8 @@ export default function TaxAIGuide() {
                   onClick={() => setActiveStep(Math.max(0, activeStep - 1))}
                   disabled={activeStep === 0}
                   style={{
-                    background: "#1e3a4a",
-                    color: "#5bc8d4",
+                    background: "var(--border-main)",
+                    color: "var(--text-dim)",
                     border: "none",
                     borderRadius: 6,
                     padding: "8px 20px",
@@ -319,7 +353,7 @@ export default function TaxAIGuide() {
                 >
                   ← Previous
                 </button>
-                <span style={{ color: "#8cabb8", fontSize: 12, alignSelf: "center", fontWeight: 600 }}>
+                <span style={{ color: "var(--text-muted)", fontSize: 12, alignSelf: "center", fontWeight: 600 }}>
                   {activeStep + 1} / {steps.length}
                 </span>
                 <button
@@ -328,8 +362,8 @@ export default function TaxAIGuide() {
                   }
                   disabled={activeStep === steps.length - 1}
                   style={{
-                    background: "#e2c074",
-                    color: "#0a1520",
+                    background: "var(--text-bright)",
+                    color: "var(--bg-main)",
                     border: "none",
                     borderRadius: 6,
                     padding: "8px 20px",

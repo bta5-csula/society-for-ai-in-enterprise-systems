@@ -1,12 +1,12 @@
 import React from 'react';
 
-export default function WhatToBuildStep() {
+export default function WhatToBuildStep({ isPrinting }) {
   return (
     <div>
       <div
         style={{
-          background: "#0a2233",
-          border: "2px solid #e2c074",
+          background: "var(--bg-card-alt)",
+          border: "2px solid var(--text-bright)",
           borderRadius: 10,
           padding: 20,
           marginBottom: 16,
@@ -14,7 +14,7 @@ export default function WhatToBuildStep() {
       >
         <div
           style={{
-            color: "#e2c074",
+            color: "var(--text-bright)",
             fontSize: 16,
             fontWeight: 700,
             marginBottom: 4,
@@ -22,14 +22,14 @@ export default function WhatToBuildStep() {
         >
           🎯 The Product: Bad Debt Risk Scorer + AR Aging Engine
         </div>
-        <div style={{ color: "#cbe0eb", fontSize: 13 }}>
+        <div style={{ color: "var(--text-main)", fontSize: 13 }}>
           A tool your firm runs quarterly to support tax provision work and audit defense
         </div>
       </div>
       {[
         {
           phase: "INPUT",
-          color: "#5bc8d4",
+          color: "var(--text-dim)",
           items: [
             "invoices.csv — invoice_date, due_date, amount, status",
             "payments.csv — payment_date, days_from_due",
@@ -39,7 +39,7 @@ export default function WhatToBuildStep() {
         },
         {
           phase: "PROCESS",
-          color: "#e2c074",
+          color: "var(--text-bright)",
           items: [
             "Build AR aging buckets: Current / 1-30 / 31-60 / 61-90 / 90+",
             "Calculate avg days late + payment volatility per customer",
@@ -61,11 +61,12 @@ export default function WhatToBuildStep() {
         <div
           key={phase}
           style={{
-            background: "#0f1923",
-            border: `1px solid ${color}33`,
+            background: "var(--bg-card)",
+            border: `1px solid ${color}`,
             borderRadius: 8,
             padding: 16,
             marginBottom: 12,
+            opacity: isPrinting ? 1 : 0.9,
           }}
         >
           <div
@@ -83,11 +84,11 @@ export default function WhatToBuildStep() {
             <div
               key={i}
               style={{
-                color: "#cbe0eb",
+                color: "var(--text-main)",
                 fontSize: 13,
                 padding: "3px 0",
                 paddingLeft: 12,
-                borderLeft: `2px solid ${color}66`,
+                borderLeft: `2px solid ${color}`,
               }}
             >
               {i}

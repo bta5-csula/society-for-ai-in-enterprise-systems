@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Download } from 'lucide-react';
 
-export default function InteractiveDemoStep() {
+export default function InteractiveDemoStep({ isPrinting }) {
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState(false);
+  const [results, setResults] = useState(isPrinting || false);
 
   const handleRun = () => {
     setLoading(true);
@@ -52,73 +52,79 @@ export default function InteractiveDemoStep() {
   };
 
   const tagStyle = {
-    background: '#0f1923', padding: '6px 14px', borderRadius: '15px', color: '#5bc8d4', fontSize: '13px', 
-    border: '1px solid #1e3a4a', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+    background: 'var(--bg-card-dark)', padding: '6px 14px', borderRadius: '15px', color: 'var(--text-dim)', fontSize: '13px', 
+    border: '1px solid var(--border-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
     transition: 'all 0.2s', fontWeight: 600
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div style={{ background: '#0a2233', padding: '20px', borderRadius: '10px', border: '1px solid #1e3a4a'}}>
-        <h3 style={{ margin: '0 0 10px 0', color: '#cbe0eb' }}>Data Sources Loaded</h3>
-        <p style={{ margin: '0 0 12px 0', color: '#8cabb8', fontSize: '12px' }}>Click to download mock datasets for local analysis.</p>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button style={tagStyle} onMouseEnter={(e) => e.target.style.background = '#1e3a4a'} onMouseLeave={(e) => e.target.style.background = '#0f1923'} onClick={() => handleDownloadDataset("invoices")}><Download size={14} /> invoices.csv</button>
-          <button style={tagStyle} onMouseEnter={(e) => e.target.style.background = '#1e3a4a'} onMouseLeave={(e) => e.target.style.background = '#0f1923'} onClick={() => handleDownloadDataset("payments")}><Download size={14} /> payments.csv</button>
-          <button style={tagStyle} onMouseEnter={(e) => e.target.style.background = '#1e3a4a'} onMouseLeave={(e) => e.target.style.background = '#0f1923'} onClick={() => handleDownloadDataset("customers")}><Download size={14} /> customers.csv</button>
+      {!isPrinting && (
+        <div style={{ background: 'var(--bg-card-alt)', padding: '20px', borderRadius: '10px', border: '1px solid var(--border-main)'}}>
+          <h3 style={{ margin: '0 0 10px 0', color: 'var(--text-main)' }}>Data Sources Loaded</h3>
+          <p style={{ margin: '0 0 12px 0', color: 'var(--text-muted)', fontSize: '12px' }}>Click to download mock datasets for local analysis.</p>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button style={tagStyle} onMouseEnter={(e) => e.target.style.background = 'var(--border-main)'} onMouseLeave={(e) => e.target.style.background = 'var(--bg-card-dark)'} onClick={() => handleDownloadDataset("invoices")}><Download size={14} /> invoices.csv</button>
+            <button style={tagStyle} onMouseEnter={(e) => e.target.style.background = 'var(--border-main)'} onMouseLeave={(e) => e.target.style.background = 'var(--bg-card-dark)'} onClick={() => handleDownloadDataset("payments")}><Download size={14} /> payments.csv</button>
+            <button style={tagStyle} onMouseEnter={(e) => e.target.style.background = 'var(--border-main)'} onMouseLeave={(e) => e.target.style.background = 'var(--bg-card-dark)'} onClick={() => handleDownloadDataset("customers")}><Download size={14} /> customers.csv</button>
+          </div>
         </div>
-      </div>
+      )}
 
-      <button 
-        onClick={handleRun}
-        disabled={loading}
-        style={{
-          background: loading ? '#0f1923' : '#e2c074',
-          color: loading ? '#5bc8d4' : '#0a1520',
-          padding: '14px 24px',
-          border: loading ? '1px solid #5bc8d4' : 'none',
-          borderRadius: '8px',
-          fontWeight: 700,
-          fontSize: '15px',
-          cursor: loading ? 'wait' : 'pointer',
-          transition: 'all 0.2s',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        {loading ? (
-          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '16px', height: '16px', border: '2px solid #5bc8d4', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-            Training GB Model & Scoring...
-          </span>
-        ) : 'Analyze Ledger Data (Run Script)'}
-      </button>
+      {!isPrinting && (
+        <button 
+          onClick={handleRun}
+          disabled={loading}
+          style={{
+            background: loading ? 'var(--bg-card-dark)' : 'var(--text-bright)',
+            color: loading ? 'var(--text-dim)' : 'var(--bg-main)',
+            padding: '14px 24px',
+            border: loading ? '1px solid var(--text-dim)' : 'none',
+            borderRadius: '8px',
+            fontWeight: 700,
+            fontSize: '15px',
+            cursor: loading ? 'wait' : 'pointer',
+            transition: 'all 0.2s',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          {loading ? (
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '16px', height: '16px', border: '2px solid var(--text-dim)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+              Training GB Model & Scoring...
+            </span>
+          ) : 'Analyze Ledger Data (Run Script)'}
+        </button>
+      )}
 
       {results && (
-        <div style={{ background: '#0f1923', borderRadius: '10px', padding: '20px', border: '1px solid #1e3a4a', animation: 'fadeIn 0.5s ease' }}>
+        <div style={{ background: 'var(--bg-card-dark)', borderRadius: '10px', padding: '20px', border: '1px solid var(--border-main)', animation: 'fadeIn 0.5s ease' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <h3 style={{ margin: 0, color: '#e2c074', fontSize: '16px' }}>AR Aging & Risk Output</h3>
-                <span style={{ color: '#7ed47e', fontSize: '12px', background: '#060e14', padding: '4px 8px', borderRadius: '4px', border: '1px solid #1e3a4a' }}>✅ Analysis Complete</span>
+                <h3 style={{ margin: 0, color: 'var(--text-bright)', fontSize: '16px' }}>AR Aging & Risk Output</h3>
+                <span style={{ color: '#7ed47e', fontSize: '12px', background: 'var(--bg-main)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border-main)' }}>✅ Analysis Complete</span>
             </div>
             
-            <button 
-                onClick={handleDownloadCSV}
-                style={{
-                    background: '#1e3a4a', color: '#cbe0eb', border: 'none', borderRadius: '6px',
-                    padding: '8px 12px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-                    fontWeight: 600
-                }}
-            >
-                <Download size={14} /> Download CSV
-            </button>
+            {!isPrinting && (
+              <button 
+                  onClick={handleDownloadCSV}
+                  style={{
+                      background: 'var(--border-main)', color: 'var(--text-main)', border: 'none', borderRadius: '6px',
+                      padding: '8px 12px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                      fontWeight: 600
+                  }}
+              >
+                  <Download size={14} /> Download CSV
+              </button>
+            )}
           </div>
           
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '13px', minWidth: '400px' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #1e3a4a', color: '#b0c4cf' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-main)', color: 'var(--text-muted)' }}>
                   <th style={{ padding: '8px 4px' }}>Customer</th>
                   <th style={{ padding: '8px 4px' }}>Current</th>
                   <th style={{ padding: '8px 4px' }}>31-60</th>
@@ -127,26 +133,26 @@ export default function InteractiveDemoStep() {
                 </tr>
               </thead>
               <tbody>
-                <tr style={{ borderBottom: '1px solid #1a2d38', color: '#cbe0eb' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-main)', color: 'var(--text-main)' }}>
                   <td style={{ padding: '10px 4px' }}>Acme Corp</td>
                   <td style={{ padding: '10px 4px' }}>$45k</td>
                   <td style={{ padding: '10px 4px' }}>$0</td>
                   <td style={{ padding: '10px 4px' }}>$0</td>
                   <td style={{ padding: '10px 4px' }}><span style={{ color: '#7ed47e' }}>Low (12%)</span></td>
                 </tr>
-                <tr style={{ borderBottom: '1px solid #1a2d38', color: '#cbe0eb', background: '#251b14' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-main)', color: 'var(--text-main)', background: isPrinting ? 'transparent' : '#251b14' }}>
                   <td style={{ padding: '10px 4px', fontWeight: 'bold' }}>Globex</td>
                   <td style={{ padding: '10px 4px' }}>$12k</td>
                   <td style={{ padding: '10px 4px' }}>$8k</td>
-                  <td style={{ padding: '10px 4px', color: '#e2c074' }}>$35k</td>
+                  <td style={{ padding: '10px 4px', color: 'var(--text-bright)' }}>$35k</td>
                   <td style={{ padding: '10px 4px' }}><span style={{ color: '#e27474', fontWeight: 'bold' }}>HIGH (88%)</span></td>
                 </tr>
-                <tr style={{ color: '#cbe0eb' }}>
+                <tr style={{ color: 'var(--text-main)' }}>
                   <td style={{ padding: '10px 4px' }}>Initech</td>
                   <td style={{ padding: '10px 4px' }}>$0</td>
                   <td style={{ padding: '10px 4px' }}>$19k</td>
                   <td style={{ padding: '10px 4px' }}>$2k</td>
-                  <td style={{ padding: '10px 4px' }}><span style={{ color: '#e2c074' }}>Medium (45%)</span></td>
+                  <td style={{ padding: '10px 4px' }}><span style={{ color: 'var(--text-bright)' }}>Medium (45%)</span></td>
                 </tr>
               </tbody>
             </table>

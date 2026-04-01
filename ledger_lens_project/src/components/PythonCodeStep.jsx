@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function PythonCodeStep() {
+export default function PythonCodeStep({ isPrinting }) {
   const [activeBlock, setActiveBlock] = useState(0);
   const blocks = [
     {
@@ -110,46 +110,22 @@ print(importance)`,
     },
   ];
 
-  return (
-    <div>
+  const renderBlock = (b, i) => (
+    <div key={i} style={{ marginBottom: isPrinting ? "32px" : "0" }}>
+      {isPrinting && (
+        <h3 style={{ color: "var(--text-bright)", fontSize: 16, marginBottom: 12 }}>{b.title}</h3>
+      )}
       <div
         style={{
-          display: "flex",
-          gap: 8,
-          marginBottom: 16,
-          flexWrap: "wrap",
-        }}
-      >
-        {blocks.map((b, i) => (
-          <button
-            key={i}
-            onClick={() => setActiveBlock(i)}
-            style={{
-              background: activeBlock === i ? "#e2c074" : "#1e3a4a",
-              color: activeBlock === i ? "#0a1520" : "#cbe0eb",
-              border: "none",
-              borderRadius: 6,
-              padding: "6px 14px",
-              fontSize: 12,
-              cursor: "pointer",
-              fontWeight: activeBlock === i ? 700 : 400,
-            }}
-          >
-            {b.title}
-          </button>
-        ))}
-      </div>
-      <div
-        style={{
-          background: "#060e14",
-          border: "1px solid #1e3a4a",
+          background: "var(--bg-card-dark)",
+          border: "1px solid var(--border-main)",
           borderRadius: 8,
           padding: 16,
         }}
       >
         <pre
           style={{
-            color: "#a8d8a8",
+            color: isPrinting ? "#006600" : "#a8d8a8",
             fontSize: 12,
             lineHeight: 1.7,
             overflowX: "auto",
@@ -157,25 +133,65 @@ print(importance)`,
             whiteSpace: "pre-wrap",
           }}
         >
-          {blocks[activeBlock].code}
+          {b.code}
         </pre>
       </div>
       <div
         style={{
-          background: "#0a2233",
-          border: "1px solid #5bc8d466",
+          background: "var(--bg-card-alt)",
+          border: "1px solid var(--border-main)",
           borderRadius: 6,
           padding: "10px 14px",
           marginTop: 10,
         }}
       >
-        <span style={{ color: "#5bc8d4", fontSize: 11, fontWeight: 700 }}>
+        <span style={{ color: "var(--text-dim)", fontSize: 11, fontWeight: 700 }}>
           💡 WHY THIS MATTERS:{" "}
         </span>
-        <span style={{ color: "#cbe0eb", fontSize: 12 }}>
-          {blocks[activeBlock].note}
+        <span style={{ color: "var(--text-main)", fontSize: 12 }}>
+          {b.note}
         </span>
       </div>
+    </div>
+  );
+
+  return (
+    <div>
+      {!isPrinting && (
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            marginBottom: 16,
+            flexWrap: "wrap",
+          }}
+        >
+          {blocks.map((b, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveBlock(i)}
+              style={{
+                background: activeBlock === i ? "var(--text-bright)" : "var(--border-main)",
+                color: activeBlock === i ? "var(--bg-main)" : "var(--text-main)",
+                border: "none",
+                borderRadius: 6,
+                padding: "6px 14px",
+                fontSize: 12,
+                cursor: "pointer",
+                fontWeight: activeBlock === i ? 700 : 400,
+              }}
+            >
+              {b.title}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {isPrinting ? (
+        blocks.map((b, i) => renderBlock(b, i))
+      ) : (
+        renderBlock(blocks[activeBlock], activeBlock)
+      )}
     </div>
   );
 }
