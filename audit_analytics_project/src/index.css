@@ -1,0 +1,17 @@
+/* Minimal reset to avoid conflicts with Theme.css */
+:root {
+  background: #070c18;
+  color: #e2e8f0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
