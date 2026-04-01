@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Building2, Database, Hammer, BrainCircuit, FileCode2, PlayCircle, Printer, ArrowLeft } from "lucide-react";
+import {
+  Building2,
+  Database,
+  Hammer,
+  BrainCircuit,
+  FileCode2,
+  PlayCircle,
+  Printer,
+  ArrowLeft,
+} from "lucide-react";
 
 // Import components
 import RealCompaniesStep from "./components/RealCompaniesStep";
@@ -64,10 +73,31 @@ export default function TaxAIGuide() {
 
   const handlePrint = () => {
     setIsPrinting(true);
+
+    // Override scroll-clipping so mobile print captures full content
+    document.body.style.overflow = "visible";
+    document.body.style.overscrollBehavior = "auto";
+    document.documentElement.style.overflow = "visible";
+    const root = document.getElementById("root");
+    if (root) {
+      root.style.height = "auto";
+      root.style.overflow = "visible";
+    }
+
     setTimeout(() => {
       window.print();
+
+      // Restore original styles
+      document.body.style.overflow = "";
+      document.body.style.overscrollBehavior = "";
+      document.documentElement.style.overflow = "";
+      if (root) {
+        root.style.height = "";
+        root.style.overflow = "";
+      }
+
       setIsPrinting(false);
-    }, 150); // Small delay to allow React to mount all steps before browser captures print window
+    }, 300); // bumped to 300ms for mobile repaint lag
   };
 
   return (
@@ -76,13 +106,15 @@ export default function TaxAIGuide() {
         minHeight: "100vh",
         background: "var(--bg-main)",
         color: "var(--text-main)",
-        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        fontFamily:
+          'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         padding: 0,
         position: "relative",
       }}
     >
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         :root {
           --bg-main: #0a1520;
           --bg-card: #0d1e2a;
@@ -140,8 +172,9 @@ export default function TaxAIGuide() {
           .content-panel { padding: 12px !important; }
           .prev-next-row { gap: 8px !important; }
         }
-      `}} />
-
+      `,
+        }}
+      />
       {/* Top glowing progress bar - fixed so it never scrolls away */}
       <motion.div
         className="screen-only"
@@ -158,9 +191,7 @@ export default function TaxAIGuide() {
           zIndex: 1000,
         }}
       />
-
       <div style={{ maxWidth: 820, margin: "0 auto", overflowX: "hidden" }}>
-
         {/* Sticky header - pins title + nav to top, never scrolls away */}
         <div
           className="screen-only"
@@ -174,23 +205,47 @@ export default function TaxAIGuide() {
           }}
         >
           {/* Header Container */}
-          <div style={{ position: "relative", textAlign: "center", marginBottom: 20, padding: "0 16px" }} className="header-wrapper">
-
+          <div
+            style={{
+              position: "relative",
+              textAlign: "center",
+              marginBottom: 20,
+              padding: "0 16px",
+            }}
+            className="header-wrapper"
+          >
             {/* Back to Projects link — top left */}
             <a
               href="https://society-for-ai-in-enterprise-systems.vercel.app/index.html#projects"
               className="back-btn"
               style={{
-                position: "absolute", left: 16, top: 0, color: "#8cabb8",
-                border: "1px solid #1e3a4a", borderRadius: "8px", padding: "8px 12px",
-                display: "flex", alignItems: "center", gap: "6px",
-                fontSize: "12px", fontWeight: 600, textDecoration: "none",
-                transition: "all 0.2s", background: "transparent"
+                position: "absolute",
+                left: 16,
+                top: 0,
+                color: "#8cabb8",
+                border: "1px solid #1e3a4a",
+                borderRadius: "8px",
+                padding: "8px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "12px",
+                fontWeight: 600,
+                textDecoration: "none",
+                transition: "all 0.2s",
+                background: "transparent",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#1e3a4a"; e.currentTarget.style.color = "#cbe0eb"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#8cabb8"; }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#1e3a4a";
+                e.currentTarget.style.color = "#cbe0eb";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "#8cabb8";
+              }}
             >
-              <ArrowLeft size={14} /><span className="back-btn-label"> Projects</span>
+              <ArrowLeft size={14} />
+              <span className="back-btn-label"> Projects</span>
             </a>
 
             {/* Print Button — top right */}
@@ -198,31 +253,72 @@ export default function TaxAIGuide() {
               onClick={handlePrint}
               className="screen-only print-btn"
               style={{
-                position: "absolute", right: 16, top: 0, background: "transparent", color: "#8cabb8",
-                border: "1px solid #1e3a4a", borderRadius: "8px", padding: "8px 12px", display: "flex",
-                alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "12px", fontWeight: 600,
-                transition: "all 0.2s"
+                position: "absolute",
+                right: 16,
+                top: 0,
+                background: "transparent",
+                color: "#8cabb8",
+                border: "1px solid #1e3a4a",
+                borderRadius: "8px",
+                padding: "8px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontWeight: 600,
+                transition: "all 0.2s",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#1e3a4a"; e.currentTarget.style.color = "#cbe0eb"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#8cabb8"; }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#1e3a4a";
+                e.currentTarget.style.color = "#cbe0eb";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "#8cabb8";
+              }}
             >
-              <Printer size={16} /><span className="print-btn-label"> Print Full Report</span>
+              <Printer size={16} />
+              <span className="print-btn-label"> Print Full Report</span>
             </button>
 
-            <div className="header-sub" style={{ color: "var(--text-dim)", fontSize: 11, letterSpacing: 4, marginBottom: 8, fontWeight: 600 }}>
+            <div
+              className="header-sub"
+              style={{
+                color: "var(--text-dim)",
+                fontSize: 11,
+                letterSpacing: 4,
+                marginBottom: 8,
+                fontWeight: 600,
+              }}
+            >
               ENTERPRISE AI FOR TAX PROFESSIONALS
             </div>
-            <h1 className="site-title" style={{ color: "var(--text-bright)", fontSize: 28, fontWeight: 700, margin: "0 0 8px" }}>
+            <h1
+              className="site-title"
+              style={{
+                color: "var(--text-bright)",
+                fontSize: 28,
+                fontWeight: 700,
+                margin: "0 0 8px",
+              }}
+            >
               From Bike Sales Data → Tax Intelligence
             </h1>
-            <p className="header-desc" style={{ color: "var(--text-main)", fontSize: 13, margin: 0 }}>
+            <p
+              className="header-desc"
+              style={{ color: "var(--text-main)", fontSize: 13, margin: 0 }}
+            >
               A practical walkthrough for public accounting professionals
             </p>
           </div>
 
           {/* Step Nav - also sticky, sits directly below header */}
           {!isPrinting && (
-            <div className="nav-container" style={{ padding: "0 16px", paddingBottom: "12px" }}>
+            <div
+              className="nav-container"
+              style={{ padding: "0 16px", paddingBottom: "12px" }}
+            >
               <div
                 style={{
                   display: "flex",
@@ -253,7 +349,8 @@ export default function TaxAIGuide() {
                         fontSize: 12,
                         fontWeight: isActive ? 600 : 400,
                         letterSpacing: 0.5,
-                        borderRight: i < steps.length - 1 ? "1px solid #1e3a4a" : "none",
+                        borderRight:
+                          i < steps.length - 1 ? "1px solid #1e3a4a" : "none",
                         transition: "all .2s",
                         display: "flex",
                         flexDirection: "column",
@@ -269,19 +366,28 @@ export default function TaxAIGuide() {
               </div>
             </div>
           )}
-        </div> {/* END sticky header wrapper */}
-
+        </div>{" "}
+        {/* END sticky header wrapper */}
         {/* Scrollable content below the sticky header */}
         <div style={{ padding: "0 16px 24px" }}>
-
           {/* --- PRINTING RENDER BLOCK --- */}
           {isPrinting ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "40px" }}
+            >
               {steps.map((s, index) => {
                 const StepContent = s.content;
                 return (
                   <div key={s.id} className="step-container">
-                    <h2 style={{ fontSize: 24, color: "var(--text-bright)", borderBottom: "2px solid var(--border-main)", paddingBottom: "10px", marginBottom: "20px" }}>
+                    <h2
+                      style={{
+                        fontSize: 24,
+                        color: "var(--text-bright)",
+                        borderBottom: "2px solid var(--border-main)",
+                        paddingBottom: "10px",
+                        marginBottom: "20px",
+                      }}
+                    >
                       Step {index + 1}: {s.title}
                     </h2>
                     <StepContent isPrinting={true} />
@@ -353,7 +459,14 @@ export default function TaxAIGuide() {
                 >
                   ← Previous
                 </button>
-                <span style={{ color: "var(--text-muted)", fontSize: 12, alignSelf: "center", fontWeight: 600 }}>
+                <span
+                  style={{
+                    color: "var(--text-muted)",
+                    fontSize: 12,
+                    alignSelf: "center",
+                    fontWeight: 600,
+                  }}
+                >
                   {activeStep + 1} / {steps.length}
                 </span>
                 <button
@@ -367,7 +480,8 @@ export default function TaxAIGuide() {
                     border: "none",
                     borderRadius: 6,
                     padding: "8px 20px",
-                    cursor: activeStep === steps.length - 1 ? "default" : "pointer",
+                    cursor:
+                      activeStep === steps.length - 1 ? "default" : "pointer",
                     opacity: activeStep === steps.length - 1 ? 0.3 : 1,
                     fontWeight: 700,
                     fontSize: 13,
@@ -378,13 +492,17 @@ export default function TaxAIGuide() {
               </div>
             </>
           )}
-        </div> {/* END scrollable content wrapper */}
-      </div> {/* END maxWidth wrapper */}
-
+        </div>{" "}
+        {/* END scrollable content wrapper */}
+      </div>{" "}
+      {/* END maxWidth wrapper */}
       {/* FOOTER */}
       {!isPrinting && (
         <footer>
-          <span>Berumen Escobedo, Anthony · Society for AI in Enterprise Systems · Est. CSULA 2026</span>
+          <span>
+            Berumen Escobedo, Anthony · Society for AI in Enterprise Systems ·
+            Est. CSULA 2026
+          </span>
           <span>Data: Audit Analytics Bike Manufacturer Dataset · FY 2023</span>
         </footer>
       )}
