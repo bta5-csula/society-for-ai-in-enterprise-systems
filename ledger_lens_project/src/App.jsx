@@ -66,39 +66,11 @@ const steps = [
 
 export default function TaxAIGuide() {
   const [activeStep, setActiveStep] = useState(0);
-  const [isPrinting, setIsPrinting] = useState(false);
 
   const ActiveComponent = steps[activeStep].content;
   const progressPercentage = ((activeStep + 1) / steps.length) * 100;
 
-  const handlePrint = () => {
-    setIsPrinting(true);
-
-    // Override scroll-clipping so mobile print captures full content
-    document.body.style.overflow = "visible";
-    document.body.style.overscrollBehavior = "auto";
-    document.documentElement.style.overflow = "visible";
-    const root = document.getElementById("root");
-    if (root) {
-      root.style.height = "auto";
-      root.style.overflow = "visible";
-    }
-
-    setTimeout(() => {
-      window.print();
-
-      // Restore original styles
-      document.body.style.overflow = "";
-      document.body.style.overscrollBehavior = "";
-      document.documentElement.style.overflow = "";
-      if (root) {
-        root.style.height = "";
-        root.style.overflow = "";
-      }
-
-      setIsPrinting(false);
-    }, 300); // bumped to 300ms for mobile repaint lag
-  };
+  const handlePrint = () => window.print();
 
   return (
     <main
@@ -131,6 +103,7 @@ export default function TaxAIGuide() {
         .nav-container div::-webkit-scrollbar { display: none; }
         
         @media print {
+          /* Remap CSS vars to light/print-friendly colors */
           :root {
             --bg-main: #ffffff;
             --bg-card: #ffffff;
@@ -143,14 +116,7 @@ export default function TaxAIGuide() {
             --border-main: #cccccc;
             --accent: #008899;
           }
-          body, html, main { 
-            background: #ffffff !important; 
-            color: #000000 !important; 
-            height: auto !important; 
-            overflow: visible !important;
-          }
-          #root { height: auto !important; overflow: visible !important; }
-          .screen-only { display: none !important; }
+          body, html, main { background: #ffffff !important; color: #000000 !important; }
           .print-header { display: block !important; }
           .step-container { page-break-inside: avoid; border-bottom: 1px solid #eee; padding-bottom: 2rem; margin-bottom: 2rem; }
         }
@@ -192,6 +158,20 @@ export default function TaxAIGuide() {
         }}
       />
       <div style={{ maxWidth: 820, margin: "0 auto", overflowX: "hidden" }}>
+        {/* Always in DOM — hidden on screen, visible on print */}
+        <div className="print-all-steps">
+          {steps.map((s, index) => {
+            const StepContent = s.content;
+            return (
+              <div key={s.id} className="step-container">
+                <h2>
+                  Step {index + 1}: {s.title}
+                </h2>
+                <StepContent isPrinting={true} />
+              </div>
+            );
+          })}
+        </div>
         {/* Sticky header - pins title + nav to top, never scrolls away */}
         <div
           className="screen-only"
@@ -314,198 +294,167 @@ export default function TaxAIGuide() {
           </div>
 
           {/* Step Nav - also sticky, sits directly below header */}
-          {!isPrinting && (
+          <div
+            className="nav-container"
+            style={{ padding: "0 16px", paddingBottom: "12px" }}
+          >
             <div
-              className="nav-container"
-              style={{ padding: "0 16px", paddingBottom: "12px" }}
+              style={{
+                display: "flex",
+                gap: 0,
+                background: "#0f1923",
+                borderRadius: 10,
+                border: "1px solid #1e3a4a",
+                overflowX: "auto",
+                whiteSpace: "nowrap",
+                msOverflowStyle: "none",
+                scrollbarWidth: "none",
+              }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  gap: 0,
-                  background: "#0f1923",
-                  borderRadius: 10,
-                  border: "1px solid #1e3a4a",
-                  overflowX: "auto",
-                  whiteSpace: "nowrap",
-                  msOverflowStyle: "none",
-                  scrollbarWidth: "none",
-                }}
-              >
-                {steps.map((s, i) => {
-                  const Icon = s.icon;
-                  const isActive = activeStep === i;
-                  return (
-                    <button
-                      key={s.id}
-                      onClick={() => setActiveStep(i)}
-                      style={{
-                        flex: "1 0 auto",
-                        padding: "16px 14px 12px",
-                        background: isActive ? "#1e3a4a" : "transparent",
-                        color: isActive ? "#e2c074" : "#b0c4cf",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: 12,
-                        fontWeight: isActive ? 600 : 400,
-                        letterSpacing: 0.5,
-                        borderRight:
-                          i < steps.length - 1 ? "1px solid #1e3a4a" : "none",
-                        transition: "all .2s",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                      {s.label}
-                    </button>
-                  );
-                })}
-              </div>
+              {steps.map((s, i) => {
+                const Icon = s.icon;
+                const isActive = activeStep === i;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => setActiveStep(i)}
+                    style={{
+                      flex: "1 0 auto",
+                      padding: "16px 14px 12px",
+                      background: isActive ? "#1e3a4a" : "transparent",
+                      color: isActive ? "#e2c074" : "#b0c4cf",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: 12,
+                      fontWeight: isActive ? 600 : 400,
+                      letterSpacing: 0.5,
+                      borderRight:
+                        i < steps.length - 1 ? "1px solid #1e3a4a" : "none",
+                      transition: "all .2s",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                    {s.label}
+                  </button>
+                );
+              })}
             </div>
-          )}
+          </div>
         </div>{" "}
         {/* END sticky header wrapper */}
         {/* Scrollable content below the sticky header */}
         <div style={{ padding: "0 16px 24px" }}>
-          {/* --- PRINTING RENDER BLOCK --- */}
-          {isPrinting ? (
+          {/* --- STANDARD INTERACTIVE INTERFACE --- */}
+          <>
+            {/* Content Container */}
             <div
-              style={{ display: "flex", flexDirection: "column", gap: "40px" }}
+              className="screen-only content-panel"
+              style={{
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-main)",
+                borderRadius: 12,
+                padding: 24,
+                minHeight: "450px",
+              }}
             >
-              {steps.map((s, index) => {
-                const StepContent = s.content;
-                return (
-                  <div key={s.id} className="step-container">
-                    <h2
-                      style={{
-                        fontSize: 24,
-                        color: "var(--text-bright)",
-                        borderBottom: "2px solid var(--border-main)",
-                        paddingBottom: "10px",
-                        marginBottom: "20px",
-                      }}
-                    >
-                      Step {index + 1}: {s.title}
-                    </h2>
-                    <StepContent isPrinting={true} />
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            /* --- STANDARD INTERACTIVE INTERFACE --- */
-            <>
-              {/* Content Container */}
-              <div
-                className="screen-only content-panel"
-                style={{
-                  background: "var(--bg-card)",
-                  border: "1px solid var(--border-main)",
-                  borderRadius: 12,
-                  padding: 24,
-                  minHeight: "450px",
-                }}
-              >
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeStep}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeStep}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <h2
+                    style={{
+                      color: "var(--text-bright)",
+                      fontSize: 18,
+                      marginTop: 0,
+                      marginBottom: 20,
+                      paddingBottom: 12,
+                      borderBottom: "1px solid var(--border-main)",
+                    }}
                   >
-                    <h2
-                      style={{
-                        color: "var(--text-bright)",
-                        fontSize: 18,
-                        marginTop: 0,
-                        marginBottom: 20,
-                        paddingBottom: 12,
-                        borderBottom: "1px solid var(--border-main)",
-                      }}
-                    >
-                      {steps[activeStep].title}
-                    </h2>
-                    <ActiveComponent isPrinting={false} />
-                  </motion.div>
-                </AnimatePresence>
-              </div>
+                    {steps[activeStep].title}
+                  </h2>
+                  <ActiveComponent isPrinting={false} />
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-              {/* Navigation Controls */}
-              <div
-                className="screen-only"
+            {/* Navigation Controls */}
+            <div
+              className="screen-only"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: 16,
+              }}
+            >
+              <button
+                onClick={() => setActiveStep(Math.max(0, activeStep - 1))}
+                disabled={activeStep === 0}
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginTop: 16,
+                  background: "var(--border-main)",
+                  color: "var(--text-dim)",
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "8px 20px",
+                  cursor: activeStep === 0 ? "default" : "pointer",
+                  opacity: activeStep === 0 ? 0.3 : 1,
+                  fontSize: 13,
                 }}
               >
-                <button
-                  onClick={() => setActiveStep(Math.max(0, activeStep - 1))}
-                  disabled={activeStep === 0}
-                  style={{
-                    background: "var(--border-main)",
-                    color: "var(--text-dim)",
-                    border: "none",
-                    borderRadius: 6,
-                    padding: "8px 20px",
-                    cursor: activeStep === 0 ? "default" : "pointer",
-                    opacity: activeStep === 0 ? 0.3 : 1,
-                    fontSize: 13,
-                  }}
-                >
-                  ← Previous
-                </button>
-                <span
-                  style={{
-                    color: "var(--text-muted)",
-                    fontSize: 12,
-                    alignSelf: "center",
-                    fontWeight: 600,
-                  }}
-                >
-                  {activeStep + 1} / {steps.length}
-                </span>
-                <button
-                  onClick={() =>
-                    setActiveStep(Math.min(steps.length - 1, activeStep + 1))
-                  }
-                  disabled={activeStep === steps.length - 1}
-                  style={{
-                    background: "var(--text-bright)",
-                    color: "var(--bg-main)",
-                    border: "none",
-                    borderRadius: 6,
-                    padding: "8px 20px",
-                    cursor:
-                      activeStep === steps.length - 1 ? "default" : "pointer",
-                    opacity: activeStep === steps.length - 1 ? 0.3 : 1,
-                    fontWeight: 700,
-                    fontSize: 13,
-                  }}
-                >
-                  Next →
-                </button>
-              </div>
-            </>
-          )}
+                ← Previous
+              </button>
+              <span
+                style={{
+                  color: "var(--text-muted)",
+                  fontSize: 12,
+                  alignSelf: "center",
+                  fontWeight: 600,
+                }}
+              >
+                {activeStep + 1} / {steps.length}
+              </span>
+              <button
+                onClick={() =>
+                  setActiveStep(Math.min(steps.length - 1, activeStep + 1))
+                }
+                disabled={activeStep === steps.length - 1}
+                style={{
+                  background: "var(--text-bright)",
+                  color: "var(--bg-main)",
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "8px 20px",
+                  cursor:
+                    activeStep === steps.length - 1 ? "default" : "pointer",
+                  opacity: activeStep === steps.length - 1 ? 0.3 : 1,
+                  fontWeight: 700,
+                  fontSize: 13,
+                }}
+              >
+                Next →
+              </button>
+            </div>
+          </>
         </div>{" "}
         {/* END scrollable content wrapper */}
       </div>{" "}
       {/* END maxWidth wrapper */}
       {/* FOOTER */}
-      {!isPrinting && (
-        <footer>
-          <span>
-            Berumen Escobedo, Anthony · Society for AI in Enterprise Systems ·
-            Est. CSULA 2026
-          </span>
-          <span>Data: Audit Analytics Bike Manufacturer Dataset · FY 2023</span>
-        </footer>
-      )}
+      <footer>
+        <span>
+          Berumen Escobedo, Anthony · Society for AI in Enterprise Systems ·
+          Est. CSULA 2026
+        </span>
+        <span>Data: Audit Analytics Bike Manufacturer Dataset · FY 2023</span>
+      </footer>
     </main>
   );
 }

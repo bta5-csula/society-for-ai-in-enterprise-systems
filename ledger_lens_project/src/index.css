@@ -18,8 +18,8 @@ html {
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -129,7 +129,7 @@ footer {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  font-family: ui-monospace, Consolas, 'Courier New', monospace;
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
   font-size: 10px;
   color: #4a6070;
   letter-spacing: 0.1em;
@@ -146,5 +146,38 @@ footer span {
     text-align: center;
     gap: 6px;
     padding: 14px 16px;
+  }
+}
+
+/* Hide print layout on screen */
+.print-all-steps {
+  display: none;
+}
+
+/* Show it only when printing */
+@media print {
+  /* Unclip every scroll container so mobile browsers capture the full DOM */
+  html,
+  body,
+  #root {
+    height: auto !important;
+    min-height: unset !important;
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+  }
+
+  /* Unclip the maxWidth wrapper — overflowX: hidden clips print on mobile */
+  #root > * {
+    overflow: visible !important;
+  }
+
+  .print-all-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .screen-only {
+    display: none !important;
   }
 }
