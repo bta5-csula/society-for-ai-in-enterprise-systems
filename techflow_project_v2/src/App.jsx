@@ -837,12 +837,15 @@ export default function App() {
   const sendChat = async (text) => {
     const q = (text || chatInput).trim();
     if (!q || chatLoading) return;
+
+    // 1. Reset UI and trigger progress stages
     setChatInput("");
     setChatMsgs((prev) => [...prev, { role: "user", content: q }]);
     setChatLoading(true);
     setAiPct(5);
     setAiStage("Analyzing data...");
     runStages();
+
     try {
       const res = await fetch(window.location.origin + "/api/gemini", {
         method: "POST",
@@ -851,29 +854,56 @@ export default function App() {
           prompt: `System: You are a sharp financial analyst for TechFlow Industries. FY 2023 data. Answer in 3–5 punchy bullet points.\n\nContext: ${AI_SYSTEM}\n\nQuestion: ${q}`,
         }),
       });
+
       if (!res.ok) throw new Error(`Server error ${res.status}`);
+
       const d = await res.json();
-      let reply = "No response.";
+      let finalReply = "No response.";
+
+      // 2.1. Robust extraction from the response object 'd'
       if (typeof d === "string") {
         try {
-          reply = JSON.parse(d).text || d;
+          const parsed = JSON.parse(d);
+          finalReply = parsed.text || parsed.reply || d;
         } catch {
-          reply = d;
+          finalReply = d;
         }
       } else if (d && typeof d === "object") {
-        reply = d.text || d.reply || d.message || JSON.stringify(d);
+        finalReply = d.text || d.reply || d.message || JSON.stringify(d);
       }
-      if (!reply || reply === "{}" || reply === "undefined") {
-        reply =
+
+      // 2.2. THE CRITICAL FIX: Intercept literal empty JSON strings
+      if (
+        finalReply === '{"text":""}' ||
+        finalReply === '{"reply":""}' ||
+        finalReply === '{"message":""}'
+      ) {
+        finalReply = "";
+      }
+
+      // 2.3. QUOTA / ERROR CHECK
+      // If empty, or returned as specific error strings, use the professional fallback
+      const isErrorOrEmpty =
+        !finalReply ||
+        finalReply === "{}" ||
+        finalReply === "undefined" ||
+        finalReply.toLowerCase().includes("quota exceeded");
+
+      if (isErrorOrEmpty) {
+        finalReply =
           "AI analyst is unfortunately unavailable for the rest of today.";
       }
+
+      // 3. Finalize UI animations
       timerRefs.current.forEach(clearTimeout);
       setAiPct(100);
       setAiStage("Done");
+
       await new Promise((r) => setTimeout(r, 400));
+
       setChatMsgs((prev) => [
         ...prev,
-        { role: "assistant", content: reply.trim() },
+        { role: "assistant", content: String(finalReply).trim() },
       ]);
     } catch (err) {
       console.error("V2 AI error:", err);
