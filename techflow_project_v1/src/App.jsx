@@ -1335,7 +1335,7 @@ Best margin: Accessories ~55%. Lowest: E-Bike 38.9%.`;
             >
               <Panel>
                 <SLabel>Revenue by Category</SLabel>
-                <ResponsiveContainer width="100%" height={isMobile ? 280 : 280}>
+                <ResponsiveContainer width="100%" height={isMobile ? 300 : 280}>
                   <PieChart>
                     <Pie
                       data={catSummary}
