@@ -2,14 +2,13 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
-  const { prompt } = req.body;
+  const { prompt, userInput } = req.body;
   if (!prompt || prompt === "ping") {
     return res.status(200).json({ text: "" });
   }
-
-  // Cap prompt size to block bulk abuse — real users won't hit this.
+  // Cap the user-supplied portion only — system instructions are excluded.
   // Raise this limit if any feature needs to send large inputs (e.g. pasting a full financial statement).
-  if (prompt.length > 4000) {
+  if (userInput && userInput.length > 4000) {
     return res.status(400).json({ error: "Prompt too long." });
   }
 
