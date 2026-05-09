@@ -1,495 +1,658 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Systems Analysis Diagram Maker — generate use-case, activity, class, and entity-relationship diagrams from plain text descriptions." />
-  <title>Systems Analysis Diagram Maker — SAIES</title>
-  <link rel="apple-touch-icon" sizes="180x180" href="favicon_io/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon_io/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon_io/favicon-16x16.png">
-  <link rel="manifest" href="favicon_io/site.webmanifest">
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Systems Analysis Diagram Maker — generate use-case, activity, class, and entity-relationship diagrams from plain text descriptions."
+    />
+    <title>Systems Analysis Diagram Maker — SAIES</title>
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="favicon_io/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="favicon_io/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="favicon_io/favicon-16x16.png"
+    />
+    <link rel="manifest" href="favicon_io/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    :root {
-      --bg: #080b10;
-      --bg2: #0d1117;
-      --bg3: #111820;
-      --gold: #c8a96e;
-      --gold2: #e8c98a;
-      --gold-dim: rgba(200,169,110,0.15);
-      --teal: #4dd9c0;
-      --teal-dim: rgba(77,217,192,0.1);
-      --text: #e8e2d6;
-      --text-dim: #b8b2a8;
-      --border: rgba(200,169,110,0.18);
-      --border2: rgba(255,255,255,0.06);
-    }
+      :root {
+        --bg: #080b10;
+        --bg2: #0d1117;
+        --bg3: #111820;
+        --gold: #c8a96e;
+        --gold2: #e8c98a;
+        --gold-dim: rgba(200, 169, 110, 0.15);
+        --teal: #4dd9c0;
+        --teal-dim: rgba(77, 217, 192, 0.1);
+        --text: #e8e2d6;
+        --text-dim: #b8b2a8;
+        --border: rgba(200, 169, 110, 0.18);
+        --border2: rgba(255, 255, 255, 0.06);
+      }
 
-    html { scroll-behavior: smooth; }
+      html {
+        scroll-behavior: smooth;
+      }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        min-height: 100vh;
+      }
 
-    /* Grid background */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(200,169,110,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(200,169,110,0.03) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
-    }
+      /* Grid background */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(200, 169, 110, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(200, 169, 110, 0.03) 1px, transparent 1px);
+        background-size: 48px 48px;
+        pointer-events: none;
+        z-index: 0;
+      }
 
-    /* NAV */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 48px;
-      background: rgba(8,11,16,0.85);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border2);
-    }
+      /* NAV */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 48px;
+        background: rgba(8, 11, 16, 0.85);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border2);
+      }
 
-    .nav-logo {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 16px;
-      letter-spacing: 0.1em;
-      color: var(--gold);
-      text-transform: uppercase;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+      .nav-logo {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 16px;
+        letter-spacing: 0.1em;
+        color: var(--gold);
+        text-transform: uppercase;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
 
-    .nav-back-btn {
-      background: transparent;
-      color: var(--text-dim);
-      border: 1px solid var(--border);
-      padding: 10px 24px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      cursor: pointer;
-      text-decoration: none;
-      transition: border-color 0.2s, color 0.2s;
-    }
+      .nav-back-btn {
+        background: transparent;
+        color: var(--text-dim);
+        border: 1px solid var(--border);
+        padding: 10px 24px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        cursor: pointer;
+        text-decoration: none;
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+      }
 
-    .nav-back-btn:hover {
-      border-color: var(--gold);
-      color: var(--gold);
-    }
+      .nav-back-btn:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
 
-    /* MAIN */
-    main {
-      position: relative;
-      z-index: 1;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 148px 48px 100px;
-    }
+      /* MAIN */
+      main {
+        position: relative;
+        z-index: 1;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 148px 48px 100px;
+      }
 
-    .page-tag {
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--teal);
-      margin-bottom: 20px;
-    }
+      .page-tag {
+        font-size: 10px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--teal);
+        margin-bottom: 20px;
+      }
 
-    h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 300;
-      font-size: clamp(36px, 5vw, 64px);
-      line-height: 1.05;
-      color: var(--text);
-      margin-bottom: 16px;
-    }
+      h1 {
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 300;
+        font-size: clamp(36px, 5vw, 64px);
+        line-height: 1.05;
+        color: var(--text);
+        margin-bottom: 16px;
+      }
 
-    h1 em { font-style: italic; color: var(--gold); }
+      h1 em {
+        font-style: italic;
+        color: var(--gold);
+      }
 
-    .divider {
-      width: 48px;
-      height: 1px;
-      background: var(--gold);
-      margin-bottom: 32px;
-    }
+      .divider {
+        width: 48px;
+        height: 1px;
+        background: var(--gold);
+        margin-bottom: 32px;
+      }
 
-    .page-sub {
-      color: var(--text-dim);
-      font-size: 13px;
-      line-height: 1.8;
-      max-width: 600px;
-      margin-bottom: 48px;
-    }
+      .page-sub {
+        color: var(--text-dim);
+        font-size: 13px;
+        line-height: 1.8;
+        max-width: 600px;
+        margin-bottom: 48px;
+      }
 
-    /* TOOL CARD */
-    .tool-card {
-      background: var(--bg2);
-      border: 1px solid var(--border2);
-      border-radius: 4px;
-      padding: 40px;
-    }
+      /* TOOL CARD */
+      .tool-card {
+        background: var(--bg2);
+        border: 1px solid var(--border2);
+        border-radius: 4px;
+        padding: 40px;
+      }
 
-    /* TYPE SELECTOR */
-    .type-label {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 12px;
-    }
+      /* TYPE SELECTOR */
+      .type-label {
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 12px;
+      }
 
-    .type-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 32px;
-    }
+      .type-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 32px;
+      }
 
-    .type-btn {
-      padding: 8px 18px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      border-radius: 2px;
-      border: 1px solid var(--border2);
-      background: transparent;
-      color: var(--text-dim);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+      .type-btn {
+        padding: 8px 18px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border-radius: 2px;
+        border: 1px solid var(--border2);
+        background: transparent;
+        color: var(--text-dim);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
 
-    .type-btn:hover {
-      border-color: var(--gold);
-      color: var(--gold);
-    }
+      .type-btn:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
 
-    .type-btn.active {
-      border-color: var(--gold);
-      background: var(--gold-dim);
-      color: var(--gold);
-    }
+      .type-btn.active {
+        border-color: var(--gold);
+        background: var(--gold-dim);
+        color: var(--gold);
+      }
 
-    /* INPUT */
-    .input-label {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 12px;
-    }
+      /* INPUT */
+      .input-label {
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 12px;
+      }
 
-    textarea {
-      width: 100%;
-      height: 130px;
-      padding: 14px 16px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      line-height: 1.7;
-      background: var(--bg3);
-      color: var(--text);
-      border: 1px solid var(--border2);
-      border-radius: 2px;
-      resize: vertical;
-      transition: border-color 0.2s;
-    }
+      textarea {
+        width: 100%;
+        height: 130px;
+        padding: 14px 16px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        line-height: 1.7;
+        background: var(--bg3);
+        color: var(--text);
+        border: 1px solid var(--border2);
+        border-radius: 2px;
+        resize: vertical;
+        transition: border-color 0.2s;
+      }
 
-    textarea:focus {
-      outline: none;
-      border-color: var(--gold);
-    }
+      textarea:focus {
+        outline: none;
+        border-color: var(--gold);
+      }
 
-    textarea::placeholder { color: var(--text-dim); opacity: 0.6; }
+      textarea::placeholder {
+        color: var(--text-dim);
+        opacity: 0.6;
+      }
 
-    .input-hint {
-      font-size: 11px;
-      color: var(--text-dim);
-      margin-top: 8px;
-      opacity: 0.7;
-    }
+      .input-hint {
+        font-size: 11px;
+        color: var(--text-dim);
+        margin-top: 8px;
+        opacity: 0.7;
+      }
 
-    /* GENERATE BUTTON */
-    .generate-btn {
-      margin-top: 24px;
-      padding: 12px 32px;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      background: var(--gold);
-      color: var(--bg);
-      border: none;
-      border-radius: 2px;
-      cursor: pointer;
-      transition: background 0.2s, opacity 0.2s;
-    }
+      /* GENERATE BUTTON */
+      .generate-btn {
+        margin-top: 24px;
+        padding: 12px 32px;
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        background: var(--gold);
+        color: var(--bg);
+        border: none;
+        border-radius: 2px;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          opacity 0.2s;
+      }
 
-    .generate-btn:hover { background: var(--gold2); }
-    .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .generate-btn:hover {
+        background: var(--gold2);
+      }
+      .generate-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
 
-    /* STATUS */
-    .status {
-      margin-top: 16px;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--teal);
-      display: none;
-    }
+      /* STATUS */
+      .status {
+        margin-top: 16px;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        color: var(--teal);
+        display: none;
+      }
 
-    .status.error { color: #e07070; }
+      .status.error {
+        color: #e07070;
+      }
 
-    /* DIAGRAM OUTPUT */
-    .diagram-output {
-      margin-top: 40px;
-      display: none;
-    }
+      /* DIAGRAM OUTPUT */
+      .diagram-output {
+        margin-top: 40px;
+        display: none;
+      }
 
-    .output-label {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+      .output-label {
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
 
-    .diagram-frame {
-      background: #ffffff;
-      border-radius: 2px;
-      padding: 32px;
-      overflow-x: auto;
-    }
+      .diagram-frame {
+        background: #ffffff;
+        border-radius: 2px;
+        padding: 32px;
+        overflow-x: auto;
+      }
 
-    .diagram-frame svg {
-      max-width: 100%;
-      height: auto;
-      display: block;
-      margin: 0 auto;
-    }
+      .diagram-frame svg {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+      }
 
-    /* CODE BLOCK */
-    .code-toggle {
-      margin-top: 16px;
-      font-size: 11px;
-      color: var(--text-dim);
-      cursor: pointer;
-      letter-spacing: 0.05em;
-      background: none;
-      border: none;
-      font-family: 'JetBrains Mono', monospace;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+      /* CODE BLOCK */
+      .code-toggle {
+        margin-top: 16px;
+        font-size: 11px;
+        color: var(--text-dim);
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        background: none;
+        border: none;
+        font-family: "JetBrains Mono", monospace;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
 
-    .code-toggle:hover { color: var(--gold); }
+      .code-toggle:hover {
+        color: var(--gold);
+      }
 
-    .code-block {
-      display: none;
-      margin-top: 12px;
-      padding: 16px;
-      background: var(--bg3);
-      border: 1px solid var(--border2);
-      border-radius: 2px;
-      font-size: 11px;
-      line-height: 1.7;
-      color: var(--text-dim);
-      white-space: pre-wrap;
-      overflow-x: auto;
-    }
+      .code-block {
+        display: none;
+        margin-top: 12px;
+        padding: 16px;
+        background: var(--bg3);
+        border: 1px solid var(--border2);
+        border-radius: 2px;
+        font-size: 11px;
+        line-height: 1.7;
+        color: var(--text-dim);
+        white-space: pre-wrap;
+        overflow-x: auto;
+      }
 
-    /* COPY BUTTON */
-    .copy-btn {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      background: transparent;
-      border: 1px solid var(--border2);
-      color: var(--text-dim);
-      padding: 4px 10px;
-      border-radius: 2px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+      /* COPY BUTTON */
+      .copy-btn {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: transparent;
+        border: 1px solid var(--border2);
+        color: var(--text-dim);
+        padding: 4px 10px;
+        border-radius: 2px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
 
-    .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+      .copy-btn:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
 
-    /* FOOTER */
-    footer {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      padding: 32px 48px;
-      border-top: 1px solid var(--border2);
-      font-size: 11px;
-      color: var(--text-dim);
-      letter-spacing: 0.05em;
-    }
+      /* FOOTER */
+      footer {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        padding: 32px 48px;
+        border-top: 1px solid var(--border2);
+        font-size: 11px;
+        color: var(--text-dim);
+        letter-spacing: 0.05em;
+      }
 
-    footer a {
-      color: var(--gold);
-      text-decoration: none;
-    }
+      footer a {
+        color: var(--gold);
+        text-decoration: none;
+      }
 
-    footer a:hover { text-decoration: underline; }
+      footer a:hover {
+        text-decoration: underline;
+      }
 
+      @media (max-width: 700px) {
+        nav {
+          padding: 16px 24px;
+        }
+        main {
+          padding: 120px 24px 80px;
+        }
+        .tool-card {
+          padding: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="index.html" class="nav-logo">
+        <img
+          src="img/saies_logo_icon.png"
+          alt="SAIES Logo"
+          style="height: 42px; width: 42px; object-fit: contain"
+        />
+        SAIES
+      </a>
+      <a href="index.html#projects" class="nav-back-btn">← Back to Projects</a>
+    </nav>
 
-    @media (max-width: 700px) {
-      nav { padding: 16px 24px; }
-      main { padding: 120px 24px 80px; }
-      .tool-card { padding: 24px; }
-    }
-  </style>
-</head>
-<body>
+    <main>
+      <div class="page-tag">// Projects — Systems Analysis</div>
+      <h1>Systems Analysis<br /><em>Diagram Maker</em></h1>
+      <div class="divider"></div>
+      <p class="page-sub">
+        Describe any system in plain English and instantly generate a
+        professional diagram. Supports use-case, activity, class, and
+        entity-relationship diagrams — powered by AI.
+      </p>
 
-  <nav>
-    <a href="index.html" class="nav-logo">
-      <img src="img/saies_logo_icon.png" alt="SAIES Logo" style="height:42px;width:42px;object-fit:contain;" />
-      SAIES
-    </a>
-    <a href="index.html#projects" class="nav-back-btn">← Back to Projects</a>
-  </nav>
-
-  <main>
-    <div class="page-tag">// Projects — Systems Analysis</div>
-    <h1>Systems Analysis<br><em>Diagram Maker</em></h1>
-    <div class="divider"></div>
-    <p class="page-sub">
-      Describe any system in plain English and instantly generate a professional diagram. Supports use-case, activity, class, and entity-relationship diagrams — powered by AI.
-    </p>
-
-    <div class="tool-card">
-
-      <div class="type-label">// Diagram type</div>
-      <div class="type-buttons">
-        <button class="type-btn active" onclick="setType('usecase', this)" onmouseenter="showDesc('usecase')" onmouseleave="showDesc(selectedType)">Use-case</button>
-        <button class="type-btn" onclick="setType('activity', this)" onmouseenter="showDesc('activity')" onmouseleave="showDesc(selectedType)">Activity</button>
-        <button class="type-btn" onclick="setType('class', this)" onmouseenter="showDesc('class')" onmouseleave="showDesc(selectedType)">Class</button>
-        <button class="type-btn" onclick="setType('er', this)" onmouseenter="showDesc('er')" onmouseleave="showDesc(selectedType)">Entity-relationship</button>
-      </div>
-      <div id="typeDesc" style="font-size:11px;color:var(--text-dim);letter-spacing:0.05em;line-height:1.7;min-height:32px;margin-bottom:24px;transition:opacity 0.2s;">
-        Shows actors (people or systems) and the actions they perform within a system. Best for mapping out who does what.
-      </div>
-
-      <div class="input-label">// Describe your system</div>
-      <textarea id="userInput" placeholder="e.g. An online store where customers can browse products, add them to a cart, and checkout. Admins can manage inventory and view orders."></textarea>
-      <div class="input-hint">Press Cmd/Ctrl + Enter to generate</div>
-
-      <button class="generate-btn" id="genBtn" onclick="generate()">Generate diagram</button>
-
-      <div id="progressWrap" style="display:none;margin-top:20px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span id="progressLabel" style="font-size:11px;letter-spacing:0.1em;color:var(--teal);">// Initializing...</span>
-          <span id="progressPct" style="font-size:11px;color:var(--text-dim);">0%</span>
+      <div class="tool-card">
+        <div class="type-label">// Diagram type</div>
+        <div class="type-buttons">
+          <button
+            class="type-btn active"
+            onclick="setType('usecase', this)"
+            onmouseenter="showDesc('usecase')"
+            onmouseleave="showDesc(selectedType)"
+          >
+            Use-case
+          </button>
+          <button
+            class="type-btn"
+            onclick="setType('activity', this)"
+            onmouseenter="showDesc('activity')"
+            onmouseleave="showDesc(selectedType)"
+          >
+            Activity
+          </button>
+          <button
+            class="type-btn"
+            onclick="setType('class', this)"
+            onmouseenter="showDesc('class')"
+            onmouseleave="showDesc(selectedType)"
+          >
+            Class
+          </button>
+          <button
+            class="type-btn"
+            onclick="setType('er', this)"
+            onmouseenter="showDesc('er')"
+            onmouseleave="showDesc(selectedType)"
+          >
+            Entity-relationship
+          </button>
         </div>
-        <div style="height:2px;background:var(--border2);border-radius:2px;overflow:hidden;">
-          <div id="progressBar" style="height:100%;width:0%;background:var(--gold);border-radius:2px;transition:width 0.4s ease;"></div>
+        <div
+          id="typeDesc"
+          style="
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 0.05em;
+            line-height: 1.7;
+            min-height: 32px;
+            margin-bottom: 24px;
+            transition: opacity 0.2s;
+          "
+        >
+          Shows actors (people or systems) and the actions they perform within a
+          system. Best for mapping out who does what.
         </div>
-      </div>
 
-      <div class="status" id="status"></div>
+        <div class="input-label">// Describe your system</div>
+        <textarea
+          id="userInput"
+          placeholder="e.g. An online store where customers can browse products, add them to a cart, and checkout. Admins can manage inventory and view orders."
+        ></textarea>
+        <div class="input-hint">Press Cmd/Ctrl + Enter to generate</div>
 
-      <div class="diagram-output" id="diagramOutput">
-        <div class="output-label">
-          <span>// Output</span>
-          <div style="display:flex;gap:8px;">
-            <button class="copy-btn" id="downloadPdfBtn" onclick="downloadPDF()">Download PDF</button>
-            <button class="copy-btn" id="downloadBtn" onclick="downloadSVG()">Download SVG</button>
-            <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy code</button>
+        <button class="generate-btn" id="genBtn" onclick="generate()">
+          Generate diagram
+        </button>
+
+        <div id="progressWrap" style="display: none; margin-top: 20px">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 8px;
+            "
+          >
+            <span
+              id="progressLabel"
+              style="font-size: 11px; letter-spacing: 0.1em; color: var(--teal)"
+              >// Initializing...</span
+            >
+            <span
+              id="progressPct"
+              style="font-size: 11px; color: var(--text-dim)"
+              >0%</span
+            >
+          </div>
+          <div
+            style="
+              height: 2px;
+              background: var(--border2);
+              border-radius: 2px;
+              overflow: hidden;
+            "
+          >
+            <div
+              id="progressBar"
+              style="
+                height: 100%;
+                width: 0%;
+                background: var(--gold);
+                border-radius: 2px;
+                transition: width 0.4s ease;
+              "
+            ></div>
           </div>
         </div>
-        <div class="diagram-frame" id="diagramFrame">
-          <div id="diagram"></div>
+
+        <div class="status" id="status"></div>
+
+        <div class="diagram-output" id="diagramOutput">
+          <div class="output-label">
+            <span>// Output</span>
+            <div style="display: flex; gap: 8px">
+              <button
+                class="copy-btn"
+                id="downloadPdfBtn"
+                onclick="downloadPDF()"
+              >
+                Download PDF
+              </button>
+              <button class="copy-btn" id="downloadBtn" onclick="downloadSVG()">
+                Download SVG
+              </button>
+              <button class="copy-btn" id="copyBtn" onclick="copyCode()">
+                Copy code
+              </button>
+            </div>
+          </div>
+          <div class="diagram-frame" id="diagramFrame">
+            <div id="diagram"></div>
+          </div>
+          <button class="code-toggle" onclick="toggleCode()" id="codeToggle">
+            ▶ Show diagram data
+          </button>
+          <pre class="code-block" id="codeBlock"></pre>
         </div>
-        <button class="code-toggle" onclick="toggleCode()" id="codeToggle">▶ Show diagram data</button>
-        <pre class="code-block" id="codeBlock"></pre>
       </div>
+    </main>
 
-    </div>
-  </main>
+    <footer>
+      A project by
+      <a href="https://www.linkedin.com/in/brian-ta-ab9a802b8/"
+        >Brian Ta — Society for AI in Enterprise Systems</a
+      >
+      · Cal State LA
+    </footer>
 
-  <footer>
-    A project by <a href="https://www.linkedin.com/in/brian-ta-ab9a802b8/">Brian Ta — Society for AI in Enterprise Systems</a> · Cal State LA
-  </footer>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+      let selectedType = "usecase";
+      let currentCode = "";
+      let codeVisible = false;
 
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script>
-    let selectedType = 'usecase';
-    let currentCode = '';
-    let codeVisible = false;
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: "default",
+        securityLevel: "loose",
+      });
 
-    mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+      const typeDescriptions = {
+        usecase:
+          "Shows actors (people or systems) and the actions they perform within a system. Best for mapping out who does what.",
+        activity:
+          "Illustrates the step-by-step flow of a process, including decisions and parallel paths. Best for modeling workflows.",
+        class:
+          "Defines the structure of a system — its objects, attributes, methods, and relationships. Best for object-oriented design.",
+        er: "Maps database entities, their attributes, and the relationships between them. Best for designing data models.",
+      };
 
-    const typeDescriptions = {
-      usecase:  'Shows actors (people or systems) and the actions they perform within a system. Best for mapping out who does what.',
-      activity: 'Illustrates the step-by-step flow of a process, including decisions and parallel paths. Best for modeling workflows.',
-      class:    'Defines the structure of a system — its objects, attributes, methods, and relationships. Best for object-oriented design.',
-      er:       'Maps database entities, their attributes, and the relationships between them. Best for designing data models.'
-    };
+      let descTimeout = null;
+      let currentDesc = "usecase";
 
-    let descTimeout = null;
-    let currentDesc = 'usecase';
-
-    function showDesc(type, instant) {
-      if (type === currentDesc) return;
-      currentDesc = type;
-      const el = document.getElementById('typeDesc');
-      clearTimeout(descTimeout);
-      if (instant) {
-        el.textContent = typeDescriptions[type] || '';
-        el.style.opacity = '1';
-        return;
+      function showDesc(type, instant) {
+        if (type === currentDesc) return;
+        currentDesc = type;
+        const el = document.getElementById("typeDesc");
+        clearTimeout(descTimeout);
+        if (instant) {
+          el.textContent = typeDescriptions[type] || "";
+          el.style.opacity = "1";
+          return;
+        }
+        el.style.transition = "opacity 0.25s ease";
+        el.style.opacity = "0";
+        descTimeout = setTimeout(() => {
+          el.textContent = typeDescriptions[type] || "";
+          el.style.opacity = "1";
+        }, 200);
       }
-      el.style.transition = 'opacity 0.25s ease';
-      el.style.opacity = '0';
-      descTimeout = setTimeout(() => {
-        el.textContent = typeDescriptions[type] || '';
-        el.style.opacity = '1';
-      }, 200);
-    }
 
-    function setType(type, btn) {
-      selectedType = type;
-      currentDesc = type;
-      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const el = document.getElementById('typeDesc');
-      el.textContent = typeDescriptions[type] || '';
-      el.style.opacity = '1';
-    }
+      function setType(type, btn) {
+        selectedType = type;
+        currentDesc = type;
+        document
+          .querySelectorAll(".type-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const el = document.getElementById("typeDesc");
+        el.textContent = typeDescriptions[type] || "";
+        el.style.opacity = "1";
+      }
 
-    const typeInstructions = {
-      usecase: `You are generating a UML use-case diagram. Return ONLY a valid JSON object — no explanation, no markdown fences, no backticks.
+      const typeInstructions = {
+        usecase: `You are generating a UML use-case diagram. Return ONLY a valid JSON object — no explanation, no markdown fences, no backticks.
 
 JSON structure:
 {
@@ -646,7 +809,7 @@ USE CASE NAMES: Verb-noun phrases, up to 8 words, sentence case.
 
 Return ONLY the raw JSON object.`,
 
-      activity: `Generate a Mermaid flowchart activity diagram.
+        activity: `Generate a Mermaid flowchart activity diagram.
 Use rounded boxes for start/end, rectangles for actions, diamonds for decisions.
 Example format:
 flowchart TD
@@ -656,7 +819,7 @@ flowchart TD
   Decision -->|No| Other[Other step]
   Next --> End([End])`,
 
-      class: `Generate a Mermaid class diagram showing classes, attributes, methods, and relationships.
+        class: `Generate a Mermaid class diagram showing classes, attributes, methods, and relationships.
 Example format:
 classDiagram
   class ClassName {
@@ -665,7 +828,7 @@ classDiagram
   }
   ClassA --|> ClassB : inherits`,
 
-      er: `Generate a Mermaid entity-relationship diagram showing entities, attributes, and relationships.
+        er: `Generate a Mermaid entity-relationship diagram showing entities, attributes, and relationships.
 Example format:
 erDiagram
   ENTITY1 {
@@ -676,497 +839,734 @@ erDiagram
     int id PK
     int entity1_id FK
   }
-  ENTITY1 ||--o{ ENTITY2 : "has"`
-    };
+  ENTITY1 ||--o{ ENTITY2 : "has"`,
+      };
 
-    function escXml(s) {
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
+      function escXml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
 
-    function wrapText(text, maxChars) {
-      const words = text.split(' ');
-      const lines = [];
-      let line = '';
-      words.forEach(w => {
-        const test = line ? line + ' ' + w : w;
-        if (test.length > maxChars && line) { lines.push(line); line = w; }
-        else line = test;
-      });
-      if (line) lines.push(line);
-      return lines;
-    }
-
-    function renderUseCaseSVG(data) {
-      const { systemName, actors, usecases, relationships } = data;
-
-      const leftActors   = actors.filter(a => a.side === 'left');
-      const rightActors  = actors.filter(a => a.side === 'right');
-      const bottomActors = actors.filter(a => a.side === 'bottom');
-      const actorIds     = new Set(actors.map(a => a.id));
-
-      const primaryUCIds = new Set(
-        relationships.filter(r => r.type==='association' && actorIds.has(r.from)).map(r => r.to)
-      );
-      const primaryUCs   = usecases.filter(uc => primaryUCIds.has(uc.id));
-      const secondaryUCs = usecases.filter(uc => !primaryUCIds.has(uc.id));
-      const secondaryIds = new Set(secondaryUCs.map(u => u.id));
-
-      // BRIDGE secondaries = point TO a primary UC → go in LEFT col
-      const bridgeIds = new Set();
-      relationships.forEach(r => {
-        if (secondaryIds.has(r.from) && primaryUCIds.has(r.to)
-            && (r.type==='include'||r.type==='extend'))
-          bridgeIds.add(r.from);
-      });
-      const bridgesFromPrimary = {};
-      relationships.forEach(r => {
-        if (primaryUCIds.has(r.from) && bridgeIds.has(r.to)
-            && (r.type==='include'||r.type==='extend')) {
-          if (!bridgesFromPrimary[r.from]) bridgesFromPrimary[r.from] = [];
-          if (!bridgesFromPrimary[r.from].includes(r.to))
-            bridgesFromPrimary[r.from].push(r.to);
-        }
-      });
-
-      // Layout constants
-      const ucRx=88, ucRy=36, primaryGapY=80, minSecSep=130, colGap=110;
-      const sysPadL=36, sysPadR=36, sysPadT=74, sysPadB=68;
-      const sysX=148, sysY=30;
-      const rowH = ucRy*2+primaryGapY;
-
-      const primaryColX = sysX+sysPadL+ucRx;
-      const secX        = sysX+sysPadL+ucRx*2+colGap+ucRx;
-      const labelX      = primaryColX+ucRx+colGap*0.45;
-
-      // Place primaries with extra spacing where bridges are inserted
-      const ucPos = {};
-      let yCursor = sysY+sysPadT+ucRy;
-      primaryUCs.forEach(uc => {
-        ucPos[uc.id] = { x: primaryColX, y: yCursor };
-        const bridges = bridgesFromPrimary[uc.id] || [];
-        yCursor += rowH + bridges.length*rowH;
-      });
-
-      // Place bridge UCs right after their source primary
-      Object.entries(bridgesFromPrimary).forEach(([primId, bList]) => {
-        bList.forEach((bId, i) => {
-          ucPos[bId] = { x: primaryColX, y: ucPos[primId].y + rowH*(i+1) };
+      function wrapText(text, maxChars) {
+        const words = text.split(" ");
+        const lines = [];
+        let line = "";
+        words.forEach((w) => {
+          const test = line ? line + " " + w : w;
+          if (test.length > maxChars && line) {
+            lines.push(line);
+            line = w;
+          } else line = test;
         });
-      });
+        if (line) lines.push(line);
+        return lines;
+      }
 
-      // LEAF secondaries → right column
-      const leafUCs = secondaryUCs.filter(uc => !bridgeIds.has(uc.id));
-      if (leafUCs.length > 0) {
-        const idealY = {};
-        leafUCs.forEach(uc => {
+      function renderUseCaseSVG(data) {
+        const { systemName, actors, usecases, relationships } = data;
+
+        const leftActors = actors.filter((a) => a.side === "left");
+        const rightActors = actors.filter((a) => a.side === "right");
+        const bottomActors = actors.filter((a) => a.side === "bottom");
+        const actorIds = new Set(actors.map((a) => a.id));
+
+        const primaryUCIds = new Set(
+          relationships
+            .filter((r) => r.type === "association" && actorIds.has(r.from))
+            .map((r) => r.to),
+        );
+        const primaryUCs = usecases.filter((uc) => primaryUCIds.has(uc.id));
+        const secondaryUCs = usecases.filter((uc) => !primaryUCIds.has(uc.id));
+        const secondaryIds = new Set(secondaryUCs.map((u) => u.id));
+
+        // BRIDGE secondaries = point TO a primary UC → go in LEFT col
+        const bridgeIds = new Set();
+        relationships.forEach((r) => {
+          if (
+            secondaryIds.has(r.from) &&
+            primaryUCIds.has(r.to) &&
+            (r.type === "include" || r.type === "extend")
+          )
+            bridgeIds.add(r.from);
+        });
+        const bridgesFromPrimary = {};
+        relationships.forEach((r) => {
+          if (
+            primaryUCIds.has(r.from) &&
+            bridgeIds.has(r.to) &&
+            (r.type === "include" || r.type === "extend")
+          ) {
+            if (!bridgesFromPrimary[r.from]) bridgesFromPrimary[r.from] = [];
+            if (!bridgesFromPrimary[r.from].includes(r.to))
+              bridgesFromPrimary[r.from].push(r.to);
+          }
+        });
+
+        // Layout constants
+        const ucRx = 88,
+          ucRy = 36,
+          primaryGapY = 80,
+          minSecSep = 130,
+          colGap = 110;
+        const sysPadL = 36,
+          sysPadR = 36,
+          sysPadT = 74,
+          sysPadB = 68;
+        const sysX = 148,
+          sysY = 30;
+        const rowH = ucRy * 2 + primaryGapY;
+
+        const primaryColX = sysX + sysPadL + ucRx;
+        const secX = sysX + sysPadL + ucRx * 2 + colGap + ucRx;
+        const labelX = primaryColX + ucRx + colGap * 0.45;
+
+        // Place primaries with extra spacing where bridges are inserted
+        const ucPos = {};
+        let yCursor = sysY + sysPadT + ucRy;
+        primaryUCs.forEach((uc) => {
+          ucPos[uc.id] = { x: primaryColX, y: yCursor };
+          const bridges = bridgesFromPrimary[uc.id] || [];
+          yCursor += rowH + bridges.length * rowH;
+        });
+
+        // Place bridge UCs right after their source primary
+        Object.entries(bridgesFromPrimary).forEach(([primId, bList]) => {
+          bList.forEach((bId, i) => {
+            ucPos[bId] = {
+              x: primaryColX,
+              y: ucPos[primId].y + rowH * (i + 1),
+            };
+          });
+        });
+
+        // LEAF secondaries → right column
+        const leafUCs = secondaryUCs.filter((uc) => !bridgeIds.has(uc.id));
+        if (leafUCs.length > 0) {
+          const idealY = {};
+          leafUCs.forEach((uc) => {
+            const ys = relationships
+              .filter(
+                (r) =>
+                  (r.from === uc.id || r.to === uc.id) &&
+                  r.type !== "association",
+              )
+              .map((r) => {
+                const oid = r.from === uc.id ? r.to : r.from;
+                return ucPos[oid]?.y;
+              })
+              .filter((y) => y != null);
+            idealY[uc.id] = ys.length
+              ? ys.reduce((s, y) => s + y, 0) / ys.length
+              : sysY + sysPadT + ucRy;
+          });
+          const sorted = [...leafUCs].sort(
+            (a, b) => idealY[a.id] - idealY[b.id],
+          );
+          const placed = [];
+          sorted.forEach((uc) => {
+            let y = idealY[uc.id];
+            for (const py of placed) {
+              if (Math.abs(y - py) < minSecSep) y = py + minSecSep;
+            }
+            placed.push(y);
+            ucPos[uc.id] = { x: secX, y };
+          });
+        }
+
+        // System height
+        const allUCYs = Object.values(ucPos).map((p) => p.y);
+        const sysH = Math.max(
+          yCursor - ucRy + sysPadB - sysY,
+          allUCYs.length ? Math.max(...allUCYs) - sysY + ucRy + sysPadB : 300,
+        );
+        const hasRightCol = leafUCs.length > 0;
+        const sysW = hasRightCol
+          ? ucRx * 2 * 2 + colGap + sysPadL + sysPadR
+          : ucRx * 2 + sysPadL + sysPadR;
+        const bottomActorH = bottomActors.length > 0 ? 148 : 0;
+        const totalW = sysX + sysW + (rightActors.length > 0 ? 148 : 40);
+        const totalH = sysY + sysH + bottomActorH + 55;
+
+        // Actor positions
+        const actorPos = {};
+        const leftIdealY = {};
+        leftActors.forEach((a) => {
           const ys = relationships
-            .filter(r => (r.from===uc.id||r.to===uc.id) && r.type!=='association')
-            .map(r => { const oid=r.from===uc.id?r.to:r.from; return ucPos[oid]?.y; })
-            .filter(y => y!=null);
-          idealY[uc.id] = ys.length ? ys.reduce((s,y)=>s+y,0)/ys.length : sysY+sysPadT+ucRy;
+            .filter((r) => r.from === a.id && r.type === "association")
+            .map((r) => ucPos[r.to]?.y)
+            .filter((y) => y != null);
+          leftIdealY[a.id] = ys.length
+            ? ys.reduce((s, y) => s + y, 0) / ys.length
+            : sysY + sysH / 2;
         });
-        const sorted = [...leafUCs].sort((a,b)=>idealY[a.id]-idealY[b.id]);
-        const placed = [];
-        sorted.forEach(uc => {
-          let y = idealY[uc.id];
-          for (const py of placed) { if(Math.abs(y-py)<minSecSep) y=py+minSecSep; }
-          placed.push(y);
-          ucPos[uc.id] = { x: secX, y };
+        const sortedLeft = [...leftActors].sort(
+          (a, b) => leftIdealY[a.id] - leftIdealY[b.id],
+        );
+        const placedActorYs = [];
+        sortedLeft.forEach((a) => {
+          let y = leftIdealY[a.id];
+          for (const py of placedActorYs) {
+            if (Math.abs(y - py) < 140) y = py + 140;
+          }
+          placedActorYs.push(y);
+          actorPos[a.id] = { x: 65, y, type: a.type || "human" };
         });
-      }
+        rightActors.forEach((a) => {
+          const ys = relationships
+            .filter((r) => r.from === a.id || r.to === a.id)
+            .map((r) => {
+              const oid = r.from === a.id ? r.to : r.from;
+              return ucPos[oid]?.y;
+            })
+            .filter((y) => y != null);
+          actorPos[a.id] = {
+            x: sysX + sysW + 75,
+            y: ys.length
+              ? ys.reduce((s, y) => s + y, 0) / ys.length
+              : sysY + sysH / 2,
+            type: a.type || "system",
+          };
+        });
+        bottomActors.forEach((a) => {
+          const xs = relationships
+            .filter((r) => r.from === a.id || r.to === a.id)
+            .map((r) => {
+              const oid = r.from === a.id ? r.to : r.from;
+              return ucPos[oid]?.x;
+            })
+            .filter((x) => x != null);
+          actorPos[a.id] = {
+            x: xs.length
+              ? xs.reduce((s, x) => s + x, 0) / xs.length
+              : sysX + sysW / 2,
+            y: sysY + sysH + 84,
+            type: a.type || "system",
+          };
+        });
 
-      // System height
-      const allUCYs = Object.values(ucPos).map(p=>p.y);
-      const sysH = Math.max(
-        yCursor - ucRy + sysPadB - sysY,
-        allUCYs.length ? Math.max(...allUCYs)-sysY+ucRy+sysPadB : 300
-      );
-      const hasRightCol = leafUCs.length>0;
-      const sysW = hasRightCol
-        ? (ucRx*2)*2+colGap+sysPadL+sysPadR
-        : ucRx*2+sysPadL+sysPadR;
-      const bottomActorH = bottomActors.length>0?148:0;
-      const totalW = sysX+sysW+(rightActors.length>0?148:40);
-      const totalH = sysY+sysH+bottomActorH+55;
+        const allPos = { ...ucPos, ...actorPos };
 
-      // Actor positions
-      const actorPos = {};
-      const leftIdealY = {};
-      leftActors.forEach(a => {
-        const ys = relationships.filter(r=>r.from===a.id&&r.type==='association')
-          .map(r=>ucPos[r.to]?.y).filter(y=>y!=null);
-        leftIdealY[a.id] = ys.length?ys.reduce((s,y)=>s+y,0)/ys.length:sysY+sysH/2;
-      });
-      const sortedLeft = [...leftActors].sort((a,b)=>leftIdealY[a.id]-leftIdealY[b.id]);
-      const placedActorYs = [];
-      sortedLeft.forEach(a => {
-        let y = leftIdealY[a.id];
-        for (const py of placedActorYs) { if(Math.abs(y-py)<140) y=py+140; }
-        placedActorYs.push(y);
-        actorPos[a.id] = { x:65, y, type:a.type||'human' };
-      });
-      rightActors.forEach(a => {
-        const ys = relationships.filter(r=>r.from===a.id||r.to===a.id)
-          .map(r=>{const oid=r.from===a.id?r.to:r.from;return ucPos[oid]?.y;}).filter(y=>y!=null);
-        actorPos[a.id] = { x:sysX+sysW+75, y:ys.length?ys.reduce((s,y)=>s+y,0)/ys.length:sysY+sysH/2, type:a.type||'system' };
-      });
-      bottomActors.forEach(a => {
-        const xs = relationships.filter(r=>r.from===a.id||r.to===a.id)
-          .map(r=>{const oid=r.from===a.id?r.to:r.from;return ucPos[oid]?.x;}).filter(x=>x!=null);
-        actorPos[a.id] = { x:xs.length?xs.reduce((s,x)=>s+x,0)/xs.length:sysX+sysW/2, y:sysY+sysH+84, type:a.type||'system' };
-      });
+        // Edge helpers
+        const outset = 5;
+        function ellipseEdge(cx, cy, tx, ty) {
+          const a = Math.atan2(ty - cy, tx - cx);
+          return {
+            x: cx + (ucRx + outset) * Math.cos(a),
+            y: cy + (ucRy + outset) * Math.sin(a),
+          };
+        }
+        function rectEdge(cx, cy, tx, ty, hw, hh) {
+          const a = Math.atan2(ty - cy, tx - cx),
+            c = Math.cos(a),
+            s = Math.sin(a);
+          const sc = Math.min(
+            c !== 0 ? (hw + outset) / Math.abs(c) : Infinity,
+            s !== 0 ? (hh + outset) / Math.abs(s) : Infinity,
+          );
+          return { x: cx + c * sc, y: cy + s * sc };
+        }
+        function stickEdge(ax, ay, tx, ty) {
+          const a = Math.atan2(ty - ay, tx - ax);
+          return { x: ax + 30 * Math.cos(a), y: ay + 44 * Math.sin(a) };
+        }
+        function getEdge(id, tx, ty) {
+          const pos = allPos[id];
+          if (!pos) return null;
+          if (ucPos[id]) return ellipseEdge(pos.x, pos.y, tx, ty);
+          if (pos.type === "system")
+            return rectEdge(pos.x, pos.y, tx, ty, 47, 24);
+          return stickEdge(pos.x, pos.y, tx, ty);
+        }
 
-      const allPos = { ...ucPos, ...actorPos };
+        let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" style="background:white;font-family:Arial,sans-serif;">`;
+        svg += `<defs><marker id="htri" markerWidth="16" markerHeight="12" refX="15" refY="6" orient="auto"><polygon points="0 0,15 6,0 12" fill="white" stroke="#444" stroke-width="1.3"/></marker></defs>`;
+        svg += `<rect x="${sysX}" y="${sysY}" width="${sysW}" height="${sysH}" fill="white" stroke="#444" stroke-width="1.8"/>`;
+        svg += `<text x="${sysX + sysW / 2}" y="${sysY + 44}" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">${escXml(systemName)}</text>`;
 
-      // Edge helpers
-      const outset=5;
-      function ellipseEdge(cx,cy,tx,ty){const a=Math.atan2(ty-cy,tx-cx);return{x:cx+(ucRx+outset)*Math.cos(a),y:cy+(ucRy+outset)*Math.sin(a)};}
-      function rectEdge(cx,cy,tx,ty,hw,hh){const a=Math.atan2(ty-cy,tx-cx),c=Math.cos(a),s=Math.sin(a);const sc=Math.min(c!==0?(hw+outset)/Math.abs(c):Infinity,s!==0?(hh+outset)/Math.abs(s):Infinity);return{x:cx+c*sc,y:cy+s*sc};}
-      function stickEdge(ax,ay,tx,ty){const a=Math.atan2(ty-ay,tx-ax);return{x:ax+30*Math.cos(a),y:ay+44*Math.sin(a)};}
-      function getEdge(id,tx,ty){const pos=allPos[id];if(!pos)return null;if(ucPos[id])return ellipseEdge(pos.x,pos.y,tx,ty);if(pos.type==='system')return rectEdge(pos.x,pos.y,tx,ty,47,24);return stickEdge(pos.x,pos.y,tx,ty);}
+        const lineData = [],
+          labelData = [];
+        relationships.forEach((rel) => {
+          const fp = allPos[rel.from],
+            tp = allPos[rel.to];
+          if (!fp || !tp) return;
+          const isSys =
+            (actorPos[rel.from] && actorPos[rel.from].type === "system") ||
+            (actorPos[rel.to] && actorPos[rel.to].type === "system");
+          const p1 = getEdge(rel.from, tp.x, tp.y),
+            p2 = getEdge(rel.to, fp.x, fp.y);
+          if (!p1 || !p2) return;
 
-      let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" style="background:white;font-family:Arial,sans-serif;">`;
-      svg+=`<defs><marker id="htri" markerWidth="16" markerHeight="12" refX="15" refY="6" orient="auto"><polygon points="0 0,15 6,0 12" fill="white" stroke="#444" stroke-width="1.3"/></marker></defs>`;
-      svg+=`<rect x="${sysX}" y="${sysY}" width="${sysW}" height="${sysH}" fill="white" stroke="#444" stroke-width="1.8"/>`;
-      svg+=`<text x="${sysX+sysW/2}" y="${sysY+44}" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">${escXml(systemName)}</text>`;
+          if (rel.type === "association") {
+            lineData.push({
+              type: "assoc",
+              x1: p1.x,
+              y1: p1.y,
+              x2: p2.x,
+              y2: p2.y,
+            });
+          } else if (rel.type === "generalization") {
+            lineData.push({
+              type: "gen",
+              x1: p1.x,
+              y1: p1.y,
+              x2: p2.x,
+              y2: p2.y,
+            });
+          } else if (isSys) {
+            lineData.push({
+              type: "assoc",
+              x1: p1.x,
+              y1: p1.y,
+              x2: p2.x,
+              y2: p2.y,
+            });
+          } else if (rel.type === "include") {
+            const fromPos = ucPos[rel.from],
+              toPos = ucPos[rel.to];
+            // Use L-shaped route only when two left-col UCs have something in between
+            // (distance > 1.5 rowH means an intermediate UC is blocking a clean straight line)
+            const isBlockedLeftLeft =
+              fromPos &&
+              toPos &&
+              Math.abs(fromPos.x - toPos.x) < 10 &&
+              toPos.y > fromPos.y &&
+              toPos.y - fromPos.y > rowH * 1.5;
 
-      const lineData=[], labelData=[];
-      relationships.forEach(rel=>{
-        const fp=allPos[rel.from],tp=allPos[rel.to]; if(!fp||!tp) return;
-        const isSys=(actorPos[rel.from]&&actorPos[rel.from].type==='system')||(actorPos[rel.to]&&actorPos[rel.to].type==='system');
-        const p1=getEdge(rel.from,tp.x,tp.y),p2=getEdge(rel.to,fp.x,fp.y); if(!p1||!p2) return;
-
-        if(rel.type==='association'){
-          lineData.push({type:'assoc',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
-        } else if(rel.type==='generalization'){
-          lineData.push({type:'gen',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
-        } else if(isSys){
-          lineData.push({type:'assoc',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
-        } else if(rel.type==='include'){
-          const fromPos = ucPos[rel.from], toPos = ucPos[rel.to];
-          // Use L-shaped route only when two left-col UCs have something in between
-          // (distance > 1.5 rowH means an intermediate UC is blocking a clean straight line)
-          const isBlockedLeftLeft = fromPos && toPos &&
-            Math.abs(fromPos.x - toPos.x) < 10 &&
-            toPos.y > fromPos.y &&
-            (toPos.y - fromPos.y) > rowH * 1.5;
-
-          if(isBlockedLeftLeft){
-            const routeX = sysX + 12; // inside the system box left wall
-            const sx = fromPos.x - ucRx - 5, sy = fromPos.y;
-            const tx = toPos.x  - ucRx - 5, ty = toPos.y - 22; // above actor line
-            lineData.push({type:'path', d:`M ${sx.toFixed(1)} ${sy.toFixed(1)} L ${routeX} ${sy.toFixed(1)} L ${routeX} ${ty.toFixed(1)} L ${tx.toFixed(1)} ${ty.toFixed(1)}`});
-            // Label at 75% down the vertical segment to avoid elements near the top
-            const labelY = sy + (ty - sy) * 0.75;
-            labelData.push({text:'<<include>>',x:routeX+52,y:labelY,lineY:labelY});
-          } else {
-            lineData.push({type:'include',x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y});
-            const dx=p2.x-p1.x, dy=p2.y-p1.y;
-            if(Math.abs(dx)>1){
-              const t=(labelX-p1.x)/dx;
-              if(t>0.1&&t<0.9){
-                const yAtLabel=p1.y+t*dy;
-                labelData.push({text:'<<include>>',x:labelX,y:yAtLabel-14,lineY:yAtLabel});
-              }
+            if (isBlockedLeftLeft) {
+              const routeX = sysX + 12; // inside the system box left wall
+              const sx = fromPos.x - ucRx - 5,
+                sy = fromPos.y;
+              const tx = toPos.x - ucRx - 5,
+                ty = toPos.y - 22; // above actor line
+              lineData.push({
+                type: "path",
+                d: `M ${sx.toFixed(1)} ${sy.toFixed(1)} L ${routeX} ${sy.toFixed(1)} L ${routeX} ${ty.toFixed(1)} L ${tx.toFixed(1)} ${ty.toFixed(1)}`,
+              });
+              // Label at 75% down the vertical segment to avoid elements near the top
+              const labelY = sy + (ty - sy) * 0.75;
+              labelData.push({
+                text: "<<include>>",
+                x: routeX + 52,
+                y: labelY,
+                lineY: labelY,
+              });
             } else {
-              const my=(p1.y+p2.y)/2;
-              // Right side of line so it doesn't conflict with L-shape label on the left
-              labelData.push({text:'<<include>>',x:p1.x+55,y:my,lineY:my});
+              lineData.push({
+                type: "include",
+                x1: p1.x,
+                y1: p1.y,
+                x2: p2.x,
+                y2: p2.y,
+              });
+              const dx = p2.x - p1.x,
+                dy = p2.y - p1.y;
+              if (Math.abs(dx) > 1) {
+                const t = (labelX - p1.x) / dx;
+                if (t > 0.1 && t < 0.9) {
+                  const yAtLabel = p1.y + t * dy;
+                  labelData.push({
+                    text: "<<include>>",
+                    x: labelX,
+                    y: yAtLabel - 14,
+                    lineY: yAtLabel,
+                  });
+                }
+              } else {
+                const my = (p1.y + p2.y) / 2;
+                // Right side of line so it doesn't conflict with L-shape label on the left
+                labelData.push({
+                  text: "<<include>>",
+                  x: p1.x + 55,
+                  y: my,
+                  lineY: my,
+                });
+              }
+            }
+          } else if (rel.type === "extend") {
+            const fromPos2 = ucPos[rel.from],
+              toPos2 = ucPos[rel.to];
+            const isBlockedLeftLeft2 =
+              fromPos2 &&
+              toPos2 &&
+              Math.abs(fromPos2.x - toPos2.x) < 10 &&
+              toPos2.y > fromPos2.y &&
+              toPos2.y - fromPos2.y > rowH * 1.5;
+
+            if (isBlockedLeftLeft2) {
+              const routeX = sysX + 12;
+              const sx = toPos2.x - ucRx - 5,
+                sy = toPos2.y;
+              const tx = fromPos2.x - ucRx - 5,
+                ty = fromPos2.y;
+              lineData.push({
+                type: "path",
+                d: `M ${sx.toFixed(1)} ${sy.toFixed(1)} L ${routeX} ${sy.toFixed(1)} L ${routeX} ${ty.toFixed(1)} L ${tx.toFixed(1)} ${ty.toFixed(1)}`,
+              });
+              const labelY = sy + (ty - sy) * 0.75;
+              labelData.push({
+                text: "<<extend>>",
+                x: routeX + 52,
+                y: labelY,
+                lineY: labelY,
+              });
+            } else {
+              lineData.push({
+                type: "extend",
+                x1: p2.x,
+                y1: p2.y,
+                x2: p1.x,
+                y2: p1.y,
+              });
+              const dx = p2.x - p1.x,
+                dy = p2.y - p1.y;
+              if (Math.abs(dx) > 1) {
+                const t = (labelX - p1.x) / dx;
+                if (t > 0.1 && t < 0.9) {
+                  const yAtLabel = p1.y + t * dy;
+                  labelData.push({
+                    text: "<<extend>>",
+                    x: labelX,
+                    y: yAtLabel - 14,
+                    lineY: yAtLabel,
+                  });
+                }
+              } else {
+                const my = (p1.y + p2.y) / 2;
+                labelData.push({
+                  text: "<<extend>>",
+                  x: p1.x - 55,
+                  y: my,
+                  lineY: my,
+                });
+              }
             }
           }
-        } else if(rel.type==='extend'){
-          const fromPos2 = ucPos[rel.from], toPos2 = ucPos[rel.to];
-          const isBlockedLeftLeft2 = fromPos2 && toPos2 &&
-            Math.abs(fromPos2.x - toPos2.x) < 10 &&
-            toPos2.y > fromPos2.y &&
-            (toPos2.y - fromPos2.y) > rowH * 1.5;
-
-          if(isBlockedLeftLeft2){
-            const routeX = sysX + 12;
-            const sx = toPos2.x  - ucRx - 5, sy = toPos2.y;
-            const tx = fromPos2.x - ucRx - 5, ty = fromPos2.y;
-            lineData.push({type:'path', d:`M ${sx.toFixed(1)} ${sy.toFixed(1)} L ${routeX} ${sy.toFixed(1)} L ${routeX} ${ty.toFixed(1)} L ${tx.toFixed(1)} ${ty.toFixed(1)}`});
-            const labelY = sy + (ty - sy) * 0.75;
-            labelData.push({text:'<<extend>>',x:routeX+52,y:labelY,lineY:labelY});
-          } else {
-            lineData.push({type:'extend',x1:p2.x,y1:p2.y,x2:p1.x,y2:p1.y});
-            const dx=p2.x-p1.x, dy=p2.y-p1.y;
-            if(Math.abs(dx)>1){
-              const t=(labelX-p1.x)/dx;
-              if(t>0.1&&t<0.9){
-                const yAtLabel=p1.y+t*dy;
-                labelData.push({text:'<<extend>>',x:labelX,y:yAtLabel-14,lineY:yAtLabel});
-              }
-            } else {
-              const my=(p1.y+p2.y)/2;
-              labelData.push({text:'<<extend>>',x:p1.x-55,y:my,lineY:my});
-            }
-          }
-        }
-      });
-
-      // Sort by lineY, enforce 18px min gap
-      labelData.sort((a,b)=>a.lineY-b.lineY);
-      for(let i=1;i<labelData.length;i++){
-        if(labelData[i].y-labelData[i-1].y<18)
-          labelData[i].y=labelData[i-1].y+18;
-      }
-
-      // Draw lines FIRST — ellipses drawn on top will cover any overlapping segments
-      lineData.forEach(l=>{
-        if(l.type==='assoc') svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.5"/>`;
-        else if(l.type==='gen') svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.5" marker-end="url(#htri)"/>`;
-        else if(l.type==='include') svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
-        else if(l.type==='extend') svg+=`<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
-        else if(l.type==='path') svg+=`<path d="${l.d}" fill="none" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
-      });
-
-      // Draw labels
-      labelData.forEach(l=>{
-        svg+=`<text x="${l.x.toFixed(1)}" y="${l.y.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="#333" font-style="italic">${escXml(l.text)}</text>`;
-      });
-
-      // Draw use cases ON TOP of lines — white fill covers any line segments passing through
-      usecases.forEach(uc=>{
-        const pos=ucPos[uc.id]; if(!pos) return;
-        svg+=`<ellipse cx="${pos.x}" cy="${pos.y}" rx="${ucRx}" ry="${ucRy}" fill="white" stroke="#555" stroke-width="1.7"/>`;
-        const lines=wrapText(uc.name,18),lh=16,startY=pos.y-(lines.length-1)*lh/2;
-        lines.forEach((l,i)=>{svg+=`<text x="${pos.x}" y="${(startY+i*lh).toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#111">${escXml(l)}</text>`;});
-      });
-
-      // Draw actors
-      function drawHuman(x,y,name){
-        const hR=14,headY=y-36,shdY=y-18,hipY=y+16,feetY=y+46;
-        svg+=`<circle cx="${x}" cy="${headY}" r="${hR}" fill="white" stroke="#444" stroke-width="1.6"/>`;
-        svg+=`<line x1="${x}" y1="${headY+hR}" x2="${x}" y2="${hipY}" stroke="#444" stroke-width="1.6"/>`;
-        svg+=`<line x1="${x-24}" y1="${shdY+7}" x2="${x+24}" y2="${shdY+7}" stroke="#444" stroke-width="1.6"/>`;
-        svg+=`<line x1="${x}" y1="${hipY}" x2="${x-20}" y2="${feetY}" stroke="#444" stroke-width="1.6"/>`;
-        svg+=`<line x1="${x}" y1="${hipY}" x2="${x+20}" y2="${feetY}" stroke="#444" stroke-width="1.6"/>`;
-        wrapText(name,12).forEach((l,i)=>{svg+=`<text x="${x}" y="${feetY+20+i*17}" text-anchor="middle" font-size="13" fill="#111">${escXml(l)}</text>`;});
-      }
-      function drawSystem(x,y,name){
-        const bw=92,bh=44;
-        svg+=`<rect x="${(x-bw/2).toFixed(1)}" y="${(y-bh/2).toFixed(1)}" width="${bw}" height="${bh}" fill="white" stroke="#444" stroke-width="1.6"/>`;
-        const lines=wrapText(name,13),lh=16,startY=y-(lines.length-1)*lh/2;
-        lines.forEach((l,i)=>{svg+=`<text x="${x}" y="${(startY+i*lh).toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="#111">${escXml(l)}</text>`;});
-      }
-      [...leftActors,...rightActors,...bottomActors].forEach(a=>{
-        const pos=actorPos[a.id]; if(!pos) return;
-        if(a.type==='human') drawHuman(pos.x,pos.y,a.name); else drawSystem(pos.x,pos.y,a.name);
-      });
-
-      svg+='</svg>';
-      return svg;
-    }
-
-    // Progress bar helpers
-    let progressTimer = null;
-    function startProgress() {
-      const wrap  = document.getElementById('progressWrap');
-      const bar   = document.getElementById('progressBar');
-      const label = document.getElementById('progressLabel');
-      const pct   = document.getElementById('progressPct');
-      wrap.style.display = 'block';
-      bar.style.width = '0%';
-      let progress = 0;
-      const stages = [
-        { target: 15, label: '// Sending request...',    duration: 600  },
-        { target: 35, label: '// AI is thinking...',     duration: 1200 },
-        { target: 80, label: '// Generating diagram...', duration: 7000 },
-      ];
-      let stageIdx = 0;
-      clearInterval(progressTimer);
-      function tick() {
-        const stage = stages[stageIdx];
-        if (!stage) return;
-        const step = (stage.target - progress) / (stage.duration / 80);
-        progress = Math.min(progress + step, stage.target);
-        bar.style.width = progress.toFixed(1) + '%';
-        pct.textContent = Math.round(progress) + '%';
-        label.textContent = stage.label;
-        if (Math.round(progress) >= stage.target) {
-          stageIdx++;
-          if (stageIdx >= stages.length) clearInterval(progressTimer);
-        }
-      }
-      progressTimer = setInterval(tick, 80);
-    }
-
-    function finishProgress(success) {
-      clearInterval(progressTimer);
-      const bar   = document.getElementById('progressBar');
-      const label = document.getElementById('progressLabel');
-      const pct   = document.getElementById('progressPct');
-      const wrap  = document.getElementById('progressWrap');
-      if (success) {
-        bar.style.width = '100%';
-        pct.textContent = '100%';
-        label.textContent = '// Done';
-        setTimeout(() => { wrap.style.display = 'none'; bar.style.width = '0%'; }, 900);
-      } else {
-        bar.style.background = '#e07070';
-        label.textContent = '// Error — try again';
-        pct.textContent = '';
-        setTimeout(() => {
-          wrap.style.display = 'none';
-          bar.style.background = 'var(--gold)';
-          bar.style.width = '0%';
-        }, 2500);
-      }
-    }
-
-    // Rate limiter — max 10 generations per hour per browser
-    const RATE_LIMIT = 10;
-    const RATE_WINDOW = 60 * 60 * 1000;
-    function checkRateLimit() {
-      const now = Date.now();
-      let log = JSON.parse(localStorage.getItem('saies_rate') || '[]');
-      log = log.filter(t => now - t < RATE_WINDOW);
-      if (log.length >= RATE_LIMIT) {
-        const resetIn = Math.ceil((RATE_WINDOW - (now - log[0])) / 60000);
-        return { allowed: false, resetIn };
-      }
-      log.push(now);
-      localStorage.setItem('saies_rate', JSON.stringify(log));
-      return { allowed: true };
-    }
-
-    async function generate() {
-      const input = document.getElementById('userInput').value.trim();
-      if (!input) return;
-
-      // Check rate limit before doing anything
-      const rate = checkRateLimit();
-      if (!rate.allowed) {
-        const status = document.getElementById('status');
-        status.style.display = 'block';
-        status.className = 'status error';
-        status.textContent = `// Limit reached — you can generate ${RATE_LIMIT} diagrams per hour. Try again in ${rate.resetIn} minute${rate.resetIn !== 1 ? 's' : ''}.`;
-        return;
-      }
-
-      const btn    = document.getElementById('genBtn');
-      const status = document.getElementById('status');
-      const output = document.getElementById('diagramOutput');
-
-      btn.disabled = true;
-      btn.textContent = 'Generating...';
-      status.style.display = 'none';
-      output.style.display = 'none';
-      startProgress();
-
-      const isUseCase = selectedType === 'usecase';
-      const userPrompt = isUseCase
-        ? `${typeInstructions.usecase}\n\nUser description: ${input}`
-        : `${typeInstructions[selectedType]}\n\nUser description: ${input}\n\nReturn ONLY the raw Mermaid diagram code. No explanation, no markdown fences, no backticks. Start directly with the diagram type keyword.`;
-
-      try {
-        const res = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: userPrompt })
         });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Request failed');
-        let raw = (data.text || '').trim();
+        // Sort by lineY, enforce 18px min gap
+        labelData.sort((a, b) => a.lineY - b.lineY);
+        for (let i = 1; i < labelData.length; i++) {
+          if (labelData[i].y - labelData[i - 1].y < 18)
+            labelData[i].y = labelData[i - 1].y + 18;
+        }
 
-        if (isUseCase) {
-          raw = raw.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim();
-          const diagram = JSON.parse(raw);
-          currentCode = JSON.stringify(diagram, null, 2);
-          document.getElementById('codeBlock').textContent = currentCode;
-          document.getElementById('diagram').innerHTML = renderUseCaseSVG(diagram);
+        // Draw lines FIRST — ellipses drawn on top will cover any overlapping segments
+        lineData.forEach((l) => {
+          if (l.type === "assoc")
+            svg += `<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.5"/>`;
+          else if (l.type === "gen")
+            svg += `<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.5" marker-end="url(#htri)"/>`;
+          else if (l.type === "include")
+            svg += `<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
+          else if (l.type === "extend")
+            svg += `<line x1="${l.x1.toFixed(1)}" y1="${l.y1.toFixed(1)}" x2="${l.x2.toFixed(1)}" y2="${l.y2.toFixed(1)}" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
+          else if (l.type === "path")
+            svg += `<path d="${l.d}" fill="none" stroke="#444" stroke-width="1.3" stroke-dasharray="7,4" marker-end="url(#htri)"/>`;
+        });
+
+        // Draw labels
+        labelData.forEach((l) => {
+          svg += `<text x="${l.x.toFixed(1)}" y="${l.y.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="#333" font-style="italic">${escXml(l.text)}</text>`;
+        });
+
+        // Draw use cases ON TOP of lines — white fill covers any line segments passing through
+        usecases.forEach((uc) => {
+          const pos = ucPos[uc.id];
+          if (!pos) return;
+          svg += `<ellipse cx="${pos.x}" cy="${pos.y}" rx="${ucRx}" ry="${ucRy}" fill="white" stroke="#555" stroke-width="1.7"/>`;
+          const lines = wrapText(uc.name, 18),
+            lh = 16,
+            startY = pos.y - ((lines.length - 1) * lh) / 2;
+          lines.forEach((l, i) => {
+            svg += `<text x="${pos.x}" y="${(startY + i * lh).toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#111">${escXml(l)}</text>`;
+          });
+        });
+
+        // Draw actors
+        function drawHuman(x, y, name) {
+          const hR = 14,
+            headY = y - 36,
+            shdY = y - 18,
+            hipY = y + 16,
+            feetY = y + 46;
+          svg += `<circle cx="${x}" cy="${headY}" r="${hR}" fill="white" stroke="#444" stroke-width="1.6"/>`;
+          svg += `<line x1="${x}" y1="${headY + hR}" x2="${x}" y2="${hipY}" stroke="#444" stroke-width="1.6"/>`;
+          svg += `<line x1="${x - 24}" y1="${shdY + 7}" x2="${x + 24}" y2="${shdY + 7}" stroke="#444" stroke-width="1.6"/>`;
+          svg += `<line x1="${x}" y1="${hipY}" x2="${x - 20}" y2="${feetY}" stroke="#444" stroke-width="1.6"/>`;
+          svg += `<line x1="${x}" y1="${hipY}" x2="${x + 20}" y2="${feetY}" stroke="#444" stroke-width="1.6"/>`;
+          wrapText(name, 12).forEach((l, i) => {
+            svg += `<text x="${x}" y="${feetY + 20 + i * 17}" text-anchor="middle" font-size="13" fill="#111">${escXml(l)}</text>`;
+          });
+        }
+        function drawSystem(x, y, name) {
+          const bw = 92,
+            bh = 44;
+          svg += `<rect x="${(x - bw / 2).toFixed(1)}" y="${(y - bh / 2).toFixed(1)}" width="${bw}" height="${bh}" fill="white" stroke="#444" stroke-width="1.6"/>`;
+          const lines = wrapText(name, 13),
+            lh = 16,
+            startY = y - ((lines.length - 1) * lh) / 2;
+          lines.forEach((l, i) => {
+            svg += `<text x="${x}" y="${(startY + i * lh).toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="#111">${escXml(l)}</text>`;
+          });
+        }
+        [...leftActors, ...rightActors, ...bottomActors].forEach((a) => {
+          const pos = actorPos[a.id];
+          if (!pos) return;
+          if (a.type === "human") drawHuman(pos.x, pos.y, a.name);
+          else drawSystem(pos.x, pos.y, a.name);
+        });
+
+        svg += "</svg>";
+        return svg;
+      }
+
+      // Progress bar helpers
+      let progressTimer = null;
+      function startProgress() {
+        const wrap = document.getElementById("progressWrap");
+        const bar = document.getElementById("progressBar");
+        const label = document.getElementById("progressLabel");
+        const pct = document.getElementById("progressPct");
+        wrap.style.display = "block";
+        bar.style.width = "0%";
+        let progress = 0;
+        const stages = [
+          { target: 15, label: "// Sending request...", duration: 600 },
+          { target: 35, label: "// AI is thinking...", duration: 1200 },
+          { target: 80, label: "// Generating diagram...", duration: 7000 },
+        ];
+        let stageIdx = 0;
+        clearInterval(progressTimer);
+        function tick() {
+          const stage = stages[stageIdx];
+          if (!stage) return;
+          const step = (stage.target - progress) / (stage.duration / 80);
+          progress = Math.min(progress + step, stage.target);
+          bar.style.width = progress.toFixed(1) + "%";
+          pct.textContent = Math.round(progress) + "%";
+          label.textContent = stage.label;
+          if (Math.round(progress) >= stage.target) {
+            stageIdx++;
+            if (stageIdx >= stages.length) clearInterval(progressTimer);
+          }
+        }
+        progressTimer = setInterval(tick, 80);
+      }
+
+      function finishProgress(success) {
+        clearInterval(progressTimer);
+        const bar = document.getElementById("progressBar");
+        const label = document.getElementById("progressLabel");
+        const pct = document.getElementById("progressPct");
+        const wrap = document.getElementById("progressWrap");
+        if (success) {
+          bar.style.width = "100%";
+          pct.textContent = "100%";
+          label.textContent = "// Done";
+          setTimeout(() => {
+            wrap.style.display = "none";
+            bar.style.width = "0%";
+          }, 900);
         } else {
-          let code = raw.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim();
-          currentCode = code;
-          document.getElementById('codeBlock').textContent = code;
-          const { svg } = await mermaid.render('mermaid-' + Date.now(), code);
-          document.getElementById('diagram').innerHTML = svg;
+          bar.style.background = "#e07070";
+          label.textContent = "// Error — try again";
+          pct.textContent = "";
+          setTimeout(() => {
+            wrap.style.display = "none";
+            bar.style.background = "var(--gold)";
+            bar.style.width = "0%";
+          }, 2500);
+        }
+      }
+
+      // Rate limiter — max 10 generations per hour per browser
+      const RATE_LIMIT = 10;
+      const RATE_WINDOW = 60 * 60 * 1000;
+      function checkRateLimit() {
+        const now = Date.now();
+        let log = JSON.parse(localStorage.getItem("saies_rate") || "[]");
+        log = log.filter((t) => now - t < RATE_WINDOW);
+        if (log.length >= RATE_LIMIT) {
+          const resetIn = Math.ceil((RATE_WINDOW - (now - log[0])) / 60000);
+          return { allowed: false, resetIn };
+        }
+        log.push(now);
+        localStorage.setItem("saies_rate", JSON.stringify(log));
+        return { allowed: true };
+      }
+
+      async function generate() {
+        const input = document.getElementById("userInput").value.trim();
+        if (!input) return;
+
+        // Check rate limit before doing anything
+        const rate = checkRateLimit();
+        if (!rate.allowed) {
+          const status = document.getElementById("status");
+          status.style.display = "block";
+          status.className = "status error";
+          status.textContent = `// Limit reached — you can generate ${RATE_LIMIT} diagrams per hour. Try again in ${rate.resetIn} minute${rate.resetIn !== 1 ? "s" : ""}.`;
+          return;
         }
 
-        finishProgress(true);
-        output.style.display = 'block';
-        if (codeVisible) {
-          codeVisible = false;
-          document.getElementById('codeBlock').style.display = 'none';
-          document.getElementById('codeToggle').textContent = '▶ Show diagram data';
+        const btn = document.getElementById("genBtn");
+        const status = document.getElementById("status");
+        const output = document.getElementById("diagramOutput");
+
+        btn.disabled = true;
+        btn.textContent = "Generating...";
+        status.style.display = "none";
+        output.style.display = "none";
+        startProgress();
+
+        const isUseCase = selectedType === "usecase";
+        const userPrompt = isUseCase
+          ? `${typeInstructions.usecase}\n\nUser description: ${input}`
+          : `${typeInstructions[selectedType]}\n\nUser description: ${input}\n\nReturn ONLY the raw Mermaid diagram code. No explanation, no markdown fences, no backticks. Start directly with the diagram type keyword.`;
+
+        try {
+          const res = await fetch("/api/claude", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: userPrompt, userInput: input }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Request failed");
+          let raw = (data.text || "").trim();
+
+          if (isUseCase) {
+            raw = raw
+              .replace(/^```[a-z]*\n?/i, "")
+              .replace(/\n?```$/i, "")
+              .trim();
+            const diagram = JSON.parse(raw);
+            currentCode = JSON.stringify(diagram, null, 2);
+            document.getElementById("codeBlock").textContent = currentCode;
+            document.getElementById("diagram").innerHTML =
+              renderUseCaseSVG(diagram);
+          } else {
+            let code = raw
+              .replace(/^```[a-z]*\n?/i, "")
+              .replace(/\n?```$/i, "")
+              .trim();
+            currentCode = code;
+            document.getElementById("codeBlock").textContent = code;
+            const { svg } = await mermaid.render("mermaid-" + Date.now(), code);
+            document.getElementById("diagram").innerHTML = svg;
+          }
+
+          finishProgress(true);
+          output.style.display = "block";
+          if (codeVisible) {
+            codeVisible = false;
+            document.getElementById("codeBlock").style.display = "none";
+            document.getElementById("codeToggle").textContent =
+              "▶ Show diagram data";
+          }
+        } catch (err) {
+          finishProgress(false);
+          status.style.display = "block";
+          status.className = "status error";
+          status.textContent = "// Error: " + err.message;
+          console.error("Full error:", err);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Generate diagram";
         }
-
-      } catch (err) {
-        finishProgress(false);
-        status.style.display = 'block';
-        status.className = 'status error';
-        status.textContent = '// Error: ' + err.message;
-        console.error('Full error:', err);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Generate diagram';
       }
-    }
 
-    function toggleCode() {
-      codeVisible = !codeVisible;
-      const block  = document.getElementById('codeBlock');
-      const toggle = document.getElementById('codeToggle');
-      block.style.display  = codeVisible ? 'block' : 'none';
-      toggle.textContent   = codeVisible ? '▼ Hide diagram data' : '▶ Show diagram data';
-    }
-
-    function downloadSVG() {
-      const svgEl = document.querySelector('#diagram svg');
-      if (!svgEl) return;
-      const serializer = new XMLSerializer();
-      const svgStr = serializer.serializeToString(svgEl);
-      const blob = new Blob([svgStr], { type: 'image/svg+xml' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      const typeName = { usecase: 'use-case', activity: 'activity', class: 'class', er: 'er' }[selectedType];
-      a.href = url;
-      a.download = `saies-${typeName}-diagram.svg`;
-      a.click();
-      URL.revokeObjectURL(url);
-      const btn = document.getElementById('downloadBtn');
-      btn.textContent = 'Downloaded!';
-      setTimeout(() => btn.textContent = 'Download SVG', 2000);
-    }
-
-    async function downloadPDF() {
-      const frame = document.getElementById('diagramFrame');
-      const btn   = document.getElementById('downloadPdfBtn');
-      btn.textContent = 'Preparing...';
-      btn.disabled = true;
-      try {
-        const canvas = await html2canvas(frame, { backgroundColor: '#ffffff', scale: 2 });
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ orientation: canvas.width > canvas.height ? 'landscape' : 'portrait', unit: 'px', format: [canvas.width / 2, canvas.height / 2] });
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
-        const typeName = { usecase: 'use-case', activity: 'activity', class: 'class', er: 'er' }[selectedType];
-        pdf.save(`saies-${typeName}-diagram.pdf`);
-        btn.textContent = 'Downloaded!';
-      } catch (err) {
-        btn.textContent = 'Error';
-        console.error(err);
-      } finally {
-        btn.disabled = false;
-        setTimeout(() => btn.textContent = 'Download PDF', 2000);
+      function toggleCode() {
+        codeVisible = !codeVisible;
+        const block = document.getElementById("codeBlock");
+        const toggle = document.getElementById("codeToggle");
+        block.style.display = codeVisible ? "block" : "none";
+        toggle.textContent = codeVisible
+          ? "▼ Hide diagram data"
+          : "▶ Show diagram data";
       }
-    }
 
-    function copyCode() {
-      navigator.clipboard.writeText(currentCode).then(() => {
-        const btn = document.getElementById('copyBtn');
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = 'Copy code', 2000);
-      });
-    }
+      function downloadSVG() {
+        const svgEl = document.querySelector("#diagram svg");
+        if (!svgEl) return;
+        const serializer = new XMLSerializer();
+        const svgStr = serializer.serializeToString(svgEl);
+        const blob = new Blob([svgStr], { type: "image/svg+xml" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const typeName = {
+          usecase: "use-case",
+          activity: "activity",
+          class: "class",
+          er: "er",
+        }[selectedType];
+        a.href = url;
+        a.download = `saies-${typeName}-diagram.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+        const btn = document.getElementById("downloadBtn");
+        btn.textContent = "Downloaded!";
+        setTimeout(() => (btn.textContent = "Download SVG"), 2000);
+      }
 
-    document.getElementById('userInput').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) generate();
-    });
+      async function downloadPDF() {
+        const frame = document.getElementById("diagramFrame");
+        const btn = document.getElementById("downloadPdfBtn");
+        btn.textContent = "Preparing...";
+        btn.disabled = true;
+        try {
+          const canvas = await html2canvas(frame, {
+            backgroundColor: "#ffffff",
+            scale: 2,
+          });
+          const imgData = canvas.toDataURL("image/png");
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({
+            orientation:
+              canvas.width > canvas.height ? "landscape" : "portrait",
+            unit: "px",
+            format: [canvas.width / 2, canvas.height / 2],
+          });
+          pdf.addImage(
+            imgData,
+            "PNG",
+            0,
+            0,
+            canvas.width / 2,
+            canvas.height / 2,
+          );
+          const typeName = {
+            usecase: "use-case",
+            activity: "activity",
+            class: "class",
+            er: "er",
+          }[selectedType];
+          pdf.save(`saies-${typeName}-diagram.pdf`);
+          btn.textContent = "Downloaded!";
+        } catch (err) {
+          btn.textContent = "Error";
+          console.error(err);
+        } finally {
+          btn.disabled = false;
+          setTimeout(() => (btn.textContent = "Download PDF"), 2000);
+        }
+      }
 
-  </script>
+      function copyCode() {
+        navigator.clipboard.writeText(currentCode).then(() => {
+          const btn = document.getElementById("copyBtn");
+          btn.textContent = "Copied!";
+          setTimeout(() => (btn.textContent = "Copy code"), 2000);
+        });
+      }
 
-</body>
+      document
+        .getElementById("userInput")
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) generate();
+        });
+    </script>
+  </body>
 </html>
