@@ -1,0 +1,61 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      :root {
+        --bg: #080b10;
+        --gold: #c8a96e;
+        --gold2: #e8c98a;
+        --teal: #4dd9c0;
+        --text: #e8e2d6;
+        --text-dim: #b8b2a8;
+        --border2: rgba(255, 255, 255, 0.06);
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 14px;
+        line-height: 1.7;
+        overflow-x: hidden;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(200, 169, 110, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(200, 169, 110, 0.03) 1px, transparent 1px);
+        background-size: 48px 48px;
+        pointer-events: none;
+        z-index: 0;
+      }
+      nav {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 20px 48px; background: rgba(8, 11, 16, 0.85); backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border2);
+      }
+      .nav-logo {
+        font-family: "Syne", sans-serif; font-weight: 800; font-size: 16px;
+        letter-spacing: 0.1em; color: var(--gold); text-transform: uppercase; text-decoration: none;
+        display: flex; align-items: center; gap: 10px;
+      }
+      .hero {
+        position: relative; min-height: 100vh; display: flex; flex-direction: column;
+        justify-content: center; align-items: center; text-align: center; padding: 148px 48px 80px;
+      }
+      h1 {
+        font-family: "Cormorant Garamond", serif; font-weight: 300;
+        font-size: clamp(52px, 7vw, 96px); line-height: 1; color: var(--text);
+        margin-bottom: 24px; text-wrap: balance;
+      }
+      h1 em { font-style: italic; color: var(--gold); }
+      .hero-sub {
+        font-size: 13px; color: var(--text-dim); max-width: 480px;
+        margin: 0 auto 48px; line-height: 1.9;
+      }
+      .btn-primary {
+        background: var(--gold); color: var(--bg); border: none; padding: 14px 32px;
+        font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 0.15em;
+        text-transform: uppercase; cursor: pointer; text-decoration: none; display: inline-block;
+        transition: background 0.2s, transform 0.15s; font-weight: 500;
+      }
+      .btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
