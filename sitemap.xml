@@ -12,4 +12,20 @@
     <loc>https://society-for-ai-in-enterprise-systems.vercel.app/financial-analysis.html</loc>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://society-for-ai-in-enterprise-systems.vercel.app/techflow_project_v2/dist/index.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://society-for-ai-in-enterprise-systems.vercel.app/techflow_project_v1/dist/index.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://society-for-ai-in-enterprise-systems.vercel.app/ledger_lens_project/dist/index.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://society-for-ai-in-enterprise-systems.vercel.app/audit_analytics_project/dist/index.html</loc>
+    <priority>0.7</priority>
+  </url>
 </urlset>
